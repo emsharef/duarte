@@ -1,0 +1,111 @@
+import { getLoansWithDetails } from '@/app/actions/loans'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+
+function getStatusColor(status?: string) {
+    switch (status) {
+        case 'Active':
+            return 'default'
+        case 'Pending':
+            return 'secondary'
+        case 'Returned':
+            return 'outline'
+        case 'Overdue':
+            return 'destructive'
+        default:
+            return 'secondary'
+    }
+}
+
+function formatDate(dateStr?: string) {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString()
+}
+
+export default async function LoansPage() {
+    const loans = await getLoansWithDetails()
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Loans</h1>
+                    <p className="text-muted-foreground">Track incoming and outgoing loans.</p>
+                </div>
+                <Link href="/dashboard/loans/new">
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Loan
+                    </Button>
+                </Link>
+            </div>
+
+            <div className="border rounded-md">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Subject</TableHead>
+                            <TableHead>Direction</TableHead>
+                            <TableHead>Borrower/Lender</TableHead>
+                            <TableHead>Start Date</TableHead>
+                            <TableHead>End Date</TableHead>
+                            <TableHead className="text-center">Objects</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loans.map((loan) => (
+                            <TableRow key={loan.id}>
+                                <TableCell className="font-medium">
+                                    {loan.loan_subject || 'Untitled Loan'}
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={loan.loan_direction === 'out' ? 'default' : 'secondary'}>
+                                        {loan.loan_direction === 'out' ? 'Loan Out' : 'Loan In'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    {loan.loan_direction === 'out'
+                                        ? (loan.borrower?.display_name || loan.borrower?.company_name || '-')
+                                        : (loan.lender?.display_name || loan.lender?.company_name || '-')
+                                    }
+                                </TableCell>
+                                <TableCell>{formatDate(loan.loan_start_date)}</TableCell>
+                                <TableCell>{formatDate(loan.loan_end_date)}</TableCell>
+                                <TableCell className="text-center">{loan.object_count || 0}</TableCell>
+                                <TableCell>
+                                    <Badge variant={getStatusColor(loan.loan_status)}>
+                                        {loan.loan_status || 'Pending'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Link href={`/dashboard/loans/${loan.id}`}>
+                                        <Button variant="ghost" size="sm">Edit</Button>
+                                    </Link>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {loans.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={8} className="h-24 text-center">
+                                    No loans found. Add your first loan.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    )
+}
