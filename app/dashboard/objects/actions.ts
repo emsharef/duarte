@@ -40,6 +40,7 @@ export type ArtObject = {
         is_primary?: boolean
         name?: string
         description?: string
+        signed_url?: string
     }>
     object_dimensions?: Array<{
         id: string
@@ -573,12 +574,15 @@ export async function getObjectsForSelection(): Promise<ObjectForSelection[]> {
         return []
     }
 
-    return (data || []).map(obj => ({
-        id: obj.id,
-        title: obj.title,
-        inventory_number: obj.inventory_number,
-        artist_name: obj.artists
-            ? `${obj.artists.first_name || ''} ${obj.artists.last_name || ''}`.trim()
-            : undefined
-    }))
+    return (data || []).map(obj => {
+        const artist = obj.artists as { first_name?: string; last_name?: string } | null
+        return {
+            id: obj.id,
+            title: obj.title,
+            inventory_number: obj.inventory_number,
+            artist_name: artist
+                ? `${artist.first_name || ''} ${artist.last_name || ''}`.trim()
+                : undefined
+        }
+    })
 }

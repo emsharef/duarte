@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createValuation, updateValuation, deleteValuation, Valuation } from '@/app/actions/valuations'
-import { getContacts } from '@/app/actions/contacts'
+import { ContactPicker } from '@/components/contact-picker'
 import { VALUE_TYPES, VALUATION_STATUSES } from '@/lib/constants'
 
 type ValuationFormProps = {
@@ -25,11 +25,7 @@ export function ValuationForm({ valuation }: ValuationFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [appraisers, setAppraisers] = useState<Array<{ id: string; display_name: string }>>([])
-
-    useEffect(() => {
-        getContacts().then(setAppraisers)
-    }, [])
+    const [appraiserContactId, setAppraiserContactId] = useState<string | undefined>(valuation?.appraiser_contact_id)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -41,7 +37,7 @@ export function ValuationForm({ valuation }: ValuationFormProps) {
             valuation_subject: formData.get('valuation_subject') as string || undefined,
             valuation_date: formData.get('valuation_date') as string || undefined,
             valuation_status: formData.get('valuation_status') as string || 'Pending',
-            appraiser_contact_id: formData.get('appraiser_contact_id') as string || undefined,
+            appraiser_contact_id: appraiserContactId || undefined,
             value_type: formData.get('value_type') as string || undefined,
             total_value: formData.get('total_value') ? parseFloat(formData.get('total_value') as string) : undefined,
             currency: formData.get('currency') as string || 'USD',
@@ -142,18 +138,13 @@ export function ValuationForm({ valuation }: ValuationFormProps) {
 
                 <div>
                     <Label htmlFor="appraiser_contact_id">Appraiser</Label>
-                    <Select name="appraiser_contact_id" defaultValue={valuation?.appraiser_contact_id || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select appraiser..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {appraisers.map((appraiser) => (
-                                <SelectItem key={appraiser.id} value={appraiser.id}>
-                                    {appraiser.display_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ContactPicker
+                        value={appraiserContactId}
+                        onChange={setAppraiserContactId}
+                        placeholder="Select appraiser..."
+                        suggestedType="Appraiser"
+                        className="w-full"
+                    />
                 </div>
 
                 <div>

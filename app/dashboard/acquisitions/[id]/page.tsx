@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { getAcquisition, getAcquisitionObjects } from '@/app/actions/acquisitions'
 import { AcquisitionForm } from '../acquisition-form'
 import { notFound } from 'next/navigation'
@@ -18,17 +19,21 @@ export default async function EditAcquisitionPage({ params }: Props) {
     const linkedObjects = await getAcquisitionObjects(id)
     const initialObjects = linkedObjects.map(item => {
         // Convert numeric values (may come as strings from DB)
-        const toNumber = (val: any): number | undefined => {
+        const toNumber = (val: unknown): number | undefined => {
             if (val === null || val === undefined) return undefined
-            const num = typeof val === 'string' ? parseFloat(val) : val
+            const num = typeof val === 'string' ? parseFloat(val) : (val as number)
             return isNaN(num) ? undefined : num
         }
 
+        // Supabase returns single objects for foreign key relations, but TS may infer as array
+        const obj = item.object as unknown as { id: string; title: string; inventory_number?: string; artist?: { first_name?: string; last_name?: string } } | null
+        const artist = obj?.artist
+
         return {
-            id: item.object?.id || '',
-            title: item.object?.title || '',
-            artist_name: item.object?.artist
-                ? `${item.object.artist.first_name || ''} ${item.object.artist.last_name || ''}`.trim()
+            id: obj?.id || '',
+            title: obj?.title || '',
+            artist_name: artist
+                ? `${artist.first_name || ''} ${artist.last_name || ''}`.trim()
                 : undefined,
             price: toNumber(item.object_price),
             discount: toNumber(item.discount),
@@ -44,7 +49,9 @@ export default async function EditAcquisitionPage({ params }: Props) {
                 <h1 className="text-2xl font-bold tracking-tight">Edit Acquisition</h1>
                 <p className="text-muted-foreground">Update acquisition details.</p>
             </div>
-            <AcquisitionForm acquisition={acquisition} initialObjects={initialObjects} />
+            <Suspense fallback={<div className="text-muted-foreground">Loading form...</div>}>
+                <AcquisitionForm acquisition={acquisition} initialObjects={initialObjects} />
+            </Suspense>
         </div>
     )
 }

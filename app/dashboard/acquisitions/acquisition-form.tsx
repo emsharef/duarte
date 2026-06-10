@@ -14,9 +14,9 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createAcquisition, updateAcquisition, deleteAcquisition, linkObjectToAcquisition, unlinkObjectFromAcquisition, Acquisition } from '@/app/actions/acquisitions'
-import { getContacts } from '@/app/actions/contacts'
 import { getObject } from '@/app/dashboard/objects/actions'
 import { ObjectPicker, SelectedObject } from '@/components/object-picker'
+import { ContactPicker } from '@/components/contact-picker'
 import { ACQUISITION_TYPES } from '@/lib/constants'
 
 type AcquisitionFormProps = {
@@ -29,14 +29,13 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [contacts, setContacts] = useState<Array<{ id: string; display_name: string }>>([])
+    const [acquiredFromId, setAcquiredFromId] = useState<string | undefined>(acquisition?.acquired_from_contact_id)
+    const [boughtById, setBoughtById] = useState<string | undefined>(acquisition?.bought_by_contact_id)
     const [selectedObjects, setSelectedObjects] = useState<SelectedObject[]>(initialObjects)
     const [currency, setCurrency] = useState(acquisition?.currency || 'USD')
     const [exchangeRate, setExchangeRate] = useState<string>(acquisition?.exchange_rate?.toString() || '')
 
     useEffect(() => {
-        getContacts().then(setContacts)
-
         // Handle ?object= query param to pre-select an object
         const objectId = searchParams.get('object')
         if (objectId && !acquisition && initialObjects.length === 0) {
@@ -88,9 +87,9 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
         const data: Partial<Acquisition> = {
             acquisition_subject: formData.get('acquisition_subject') as string || undefined,
             acquisition_date: formData.get('acquisition_date') as string || undefined,
-            acquired_from_contact_id: formData.get('acquired_from_contact_id') as string || undefined,
+            acquired_from_contact_id: acquiredFromId || undefined,
             acquisition_type: formData.get('acquisition_type') as string || undefined,
-            bought_by_contact_id: formData.get('bought_by_contact_id') as string || undefined,
+            bought_by_contact_id: boughtById || undefined,
             currency,
             exchange_rate: exchangeRate ? parseFloat(exchangeRate) : undefined,
             // Store calculated totals for backwards compatibility / reporting
@@ -208,34 +207,24 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
 
                 <div>
                     <Label htmlFor="acquired_from_contact_id">Acquired From</Label>
-                    <Select name="acquired_from_contact_id" defaultValue={acquisition?.acquired_from_contact_id || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select contact..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {contacts.map((contact) => (
-                                <SelectItem key={contact.id} value={contact.id}>
-                                    {contact.display_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ContactPicker
+                        value={acquiredFromId}
+                        onChange={setAcquiredFromId}
+                        placeholder="Select seller..."
+                        suggestedType="Auction House"
+                        className="w-full"
+                    />
                 </div>
 
                 <div>
                     <Label htmlFor="bought_by_contact_id">Bought By</Label>
-                    <Select name="bought_by_contact_id" defaultValue={acquisition?.bought_by_contact_id || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select buyer..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {contacts.map((contact) => (
-                                <SelectItem key={contact.id} value={contact.id}>
-                                    {contact.display_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ContactPicker
+                        value={boughtById}
+                        onChange={setBoughtById}
+                        placeholder="Select buyer..."
+                        suggestedType="Collector"
+                        className="w-full"
+                    />
                 </div>
 
                 <div>

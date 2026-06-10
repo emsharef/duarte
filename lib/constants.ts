@@ -95,6 +95,19 @@ export const DOCUMENT_TYPES = [
     'Other',
 ] as const
 
+// Location types
+export const LOCATION_TYPES = [
+    'Building',
+    'Room',
+    'Wall',
+    'Storage',
+    'Vault',
+    'Gallery',
+    'Office',
+    'Warehouse',
+    'Other',
+] as const
+
 // Entity types for document linking
 export const ENTITY_TYPES = [
     'object',

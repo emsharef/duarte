@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { AcquisitionForm } from '../acquisition-form'
 
 export default function NewAcquisitionPage() {
@@ -7,7 +8,9 @@ export default function NewAcquisitionPage() {
                 <h1 className="text-2xl font-bold tracking-tight">Add Acquisition</h1>
                 <p className="text-muted-foreground">Record a new purchase, gift, or other acquisition.</p>
             </div>
-            <AcquisitionForm />
+            <Suspense fallback={<div className="text-muted-foreground">Loading form...</div>}>
+                <AcquisitionForm />
+            </Suspense>
         </div>
     )
 }

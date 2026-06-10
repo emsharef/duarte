@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createInsurancePolicy, updateInsurancePolicy, deleteInsurancePolicy, InsurancePolicy } from '@/app/actions/insurance'
-import { getContacts } from '@/app/actions/contacts'
+import { ContactPicker } from '@/components/contact-picker'
 import { COVERAGE_TYPES } from '@/lib/constants'
 
 type InsuranceFormProps = {
@@ -25,12 +25,8 @@ export function InsuranceForm({ policy }: InsuranceFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [insurers, setInsurers] = useState<Array<{ id: string; display_name: string }>>([])
     const [isActive, setIsActive] = useState(policy?.is_active ?? true)
-
-    useEffect(() => {
-        getContacts().then(setInsurers)
-    }, [])
+    const [insurerContactId, setInsurerContactId] = useState<string | undefined>(policy?.insurer_contact_id)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -41,7 +37,7 @@ export function InsuranceForm({ policy }: InsuranceFormProps) {
         const data: Partial<InsurancePolicy> = {
             policy_subject: formData.get('policy_subject') as string || undefined,
             policy_number: formData.get('policy_number') as string || undefined,
-            insurer_contact_id: formData.get('insurer_contact_id') as string || undefined,
+            insurer_contact_id: insurerContactId || undefined,
             start_date: formData.get('start_date') as string || undefined,
             end_date: formData.get('end_date') as string || undefined,
             coverage_type: formData.get('coverage_type') as string || undefined,
@@ -131,18 +127,13 @@ export function InsuranceForm({ policy }: InsuranceFormProps) {
 
                 <div className="col-span-2">
                     <Label htmlFor="insurer_contact_id">Insurance Company</Label>
-                    <Select name="insurer_contact_id" defaultValue={policy?.insurer_contact_id || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select insurer..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {insurers.map((insurer) => (
-                                <SelectItem key={insurer.id} value={insurer.id}>
-                                    {insurer.display_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ContactPicker
+                        value={insurerContactId}
+                        onChange={setInsurerContactId}
+                        placeholder="Select insurer..."
+                        suggestedType="Insurance Company"
+                        className="w-full"
+                    />
                 </div>
 
                 <div>

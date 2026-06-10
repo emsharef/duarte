@@ -14,18 +14,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createLocation, updateLocation, deleteLocation, getLocations, Location } from '@/app/actions/locations'
-
-const LOCATION_TYPES = [
-    'Building',
-    'Room',
-    'Wall',
-    'Storage',
-    'Vault',
-    'Gallery',
-    'Office',
-    'Warehouse',
-    'Other',
-]
+import { LOCATION_TYPES } from '@/lib/constants'
 
 type LocationFormProps = {
     location?: Location
@@ -56,12 +45,6 @@ export function LocationForm({ location }: LocationFormProps) {
             type: formData.get('type') as string || undefined,
             description: formData.get('description') as string || undefined,
             parent_id: parentId && parentId !== 'none' ? parentId : undefined,
-            address_line1: formData.get('address_line1') as string || undefined,
-            address_line2: formData.get('address_line2') as string || undefined,
-            city: formData.get('city') as string || undefined,
-            state: formData.get('state') as string || undefined,
-            postal_code: formData.get('postal_code') as string || undefined,
-            country: formData.get('country') as string || undefined,
         }
 
         try {
@@ -156,64 +139,6 @@ export function LocationForm({ location }: LocationFormProps) {
                         rows={2}
                         defaultValue={location?.description || ''}
                         placeholder="Additional details about this location..."
-                    />
-                </div>
-
-                <div className="col-span-2 border-t pt-4 mt-2">
-                    <h3 className="font-medium mb-3">Address (optional)</h3>
-                </div>
-
-                <div className="col-span-2">
-                    <Label htmlFor="address_line1">Address Line 1</Label>
-                    <Input
-                        id="address_line1"
-                        name="address_line1"
-                        defaultValue={location?.address_line1 || ''}
-                    />
-                </div>
-
-                <div className="col-span-2">
-                    <Label htmlFor="address_line2">Address Line 2</Label>
-                    <Input
-                        id="address_line2"
-                        name="address_line2"
-                        defaultValue={location?.address_line2 || ''}
-                    />
-                </div>
-
-                <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                        id="city"
-                        name="city"
-                        defaultValue={location?.city || ''}
-                    />
-                </div>
-
-                <div>
-                    <Label htmlFor="state">State / Province</Label>
-                    <Input
-                        id="state"
-                        name="state"
-                        defaultValue={location?.state || ''}
-                    />
-                </div>
-
-                <div>
-                    <Label htmlFor="postal_code">Postal Code</Label>
-                    <Input
-                        id="postal_code"
-                        name="postal_code"
-                        defaultValue={location?.postal_code || ''}
-                    />
-                </div>
-
-                <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                        id="country"
-                        name="country"
-                        defaultValue={location?.country || ''}
                     />
                 </div>
             </div>

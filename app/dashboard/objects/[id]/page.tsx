@@ -35,8 +35,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { getObjectWithRelations, updateObject, deleteObject, getLocations, getCategories, ObjectWithRelations } from '../actions'
+import { getObjectWithRelations, updateObject, deleteObject, getCategories, ObjectWithRelations } from '../actions'
 import { getArtists, createArtist } from '@/app/actions/artists'
+import { LocationPicker } from '@/components/location-picker'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -87,8 +88,8 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
     const [isEditing, setIsEditing] = useState(false)
     const [dimensions, setDimensions] = useState<Dimension[]>([])
     const [artists, setArtists] = useState<any[]>([])
-    const [locations, setLocations] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
+    const [selectedLocation, setSelectedLocation] = useState<string | undefined>()
     const [selectedArtist, setSelectedArtist] = useState<string>('')
     const [artistSearch, setArtistSearch] = useState('')
     const [artistOpen, setArtistOpen] = useState(false)
@@ -96,16 +97,16 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
 
     useEffect(() => {
         async function loadData() {
-            const [obj, artistList, locationList, categoryList] = await Promise.all([
+            const [obj, artistList, categoryList] = await Promise.all([
                 getObjectWithRelations(id),
                 getArtists(),
-                getLocations(),
                 getCategories(),
             ])
 
             if (obj) {
                 setObject(obj)
                 setSelectedArtist(obj.artist_id || '')
+                setSelectedLocation(obj.location_id || undefined)
                 if (obj.object_dimensions && obj.object_dimensions.length > 0) {
                     setDimensions(obj.object_dimensions.map(d => ({
                         id: d.id,
@@ -120,7 +121,6 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                 }
             }
             setArtists(artistList)
-            setLocations(locationList)
             setCategories(categoryList)
             setLoading(false)
         }
@@ -1006,12 +1006,13 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                 <CardTitle>Location</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <Select name="location_id" defaultValue={object.location_id || ''}>
-                                    <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
-                                    <SelectContent>
-                                        {locations.map(l => (<SelectItem key={l.id} value={l.id}>{l.name} {l.type && `(${l.type})`}</SelectItem>))}
-                                    </SelectContent>
-                                </Select>
+                                <LocationPicker
+                                    value={selectedLocation}
+                                    onChange={setSelectedLocation}
+                                    placeholder="Select location..."
+                                    name="location_id"
+                                    className="w-full"
+                                />
                             </CardContent>
                         </Card>
 

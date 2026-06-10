@@ -90,21 +90,20 @@ export async function createLocation(data: Partial<Location>) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Unauthorized')
 
+    // Build insert object with only fields that exist in the database
+    const insertData: Record<string, unknown> = {
+        user_id: user.id,
+        name: data.name,
+    }
+
+    // Add optional fields if provided
+    if (data.type) insertData.type = data.type
+    if (data.description) insertData.description = data.description
+    if (data.parent_id) insertData.parent_id = data.parent_id
+
     const { data: location, error } = await supabase
         .from('locations')
-        .insert({
-            user_id: user.id,
-            name: data.name,
-            type: data.type || null,
-            description: data.description || null,
-            address_line1: data.address_line1 || null,
-            address_line2: data.address_line2 || null,
-            city: data.city || null,
-            state: data.state || null,
-            postal_code: data.postal_code || null,
-            country: data.country || null,
-            parent_id: data.parent_id || null,
-        })
+        .insert(insertData)
         .select()
         .single()
 
@@ -118,21 +117,18 @@ export async function updateLocation(id: string, data: Partial<Location>) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Unauthorized')
 
+    // Build update object with only core fields that exist in the database
+    const updateData: Record<string, unknown> = {
+        name: data.name,
+        type: data.type || null,
+        description: data.description || null,
+        parent_id: data.parent_id || null,
+        updated_at: new Date().toISOString(),
+    }
+
     const { data: location, error } = await supabase
         .from('locations')
-        .update({
-            name: data.name,
-            type: data.type || null,
-            description: data.description || null,
-            address_line1: data.address_line1 || null,
-            address_line2: data.address_line2 || null,
-            city: data.city || null,
-            state: data.state || null,
-            postal_code: data.postal_code || null,
-            country: data.country || null,
-            parent_id: data.parent_id || null,
-            updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single()

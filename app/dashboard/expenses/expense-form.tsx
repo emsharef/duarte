@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createExpense, updateExpense, deleteExpense, Expense } from '@/app/actions/expenses'
-import { getContacts } from '@/app/actions/contacts'
+import { ContactPicker } from '@/components/contact-picker'
 import { EXPENSE_TYPES } from '@/lib/constants'
 
 type ExpenseFormProps = {
@@ -26,11 +26,7 @@ export function ExpenseForm({ expense, objectId }: ExpenseFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [vendors, setVendors] = useState<Array<{ id: string; display_name: string }>>([])
-
-    useEffect(() => {
-        getContacts().then(setVendors)
-    }, [])
+    const [vendorContactId, setVendorContactId] = useState<string | undefined>(expense?.vendor_contact_id)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -42,7 +38,7 @@ export function ExpenseForm({ expense, objectId }: ExpenseFormProps) {
             object_id: formData.get('object_id') as string || objectId || undefined,
             expense_type: formData.get('expense_type') as string || undefined,
             expense_date: formData.get('expense_date') as string || undefined,
-            vendor_contact_id: formData.get('vendor_contact_id') as string || undefined,
+            vendor_contact_id: vendorContactId || undefined,
             amount: formData.get('amount') ? parseFloat(formData.get('amount') as string) : undefined,
             currency: formData.get('currency') as string || 'USD',
             description: formData.get('description') as string || undefined,
@@ -143,18 +139,13 @@ export function ExpenseForm({ expense, objectId }: ExpenseFormProps) {
 
                 <div className="col-span-2">
                     <Label htmlFor="vendor_contact_id">Vendor</Label>
-                    <Select name="vendor_contact_id" defaultValue={expense?.vendor_contact_id || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select vendor..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {vendors.map((vendor) => (
-                                <SelectItem key={vendor.id} value={vendor.id}>
-                                    {vendor.display_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <ContactPicker
+                        value={vendorContactId}
+                        onChange={setVendorContactId}
+                        placeholder="Select vendor..."
+                        suggestedType="Vendor"
+                        className="w-full"
+                    />
                 </div>
 
                 <div>

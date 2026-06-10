@@ -14,8 +14,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { createLoan, updateLoan, deleteLoan, Loan } from '@/app/actions/loans'
-import { getContacts } from '@/app/actions/contacts'
 import { getInsurancePolicies } from '@/app/actions/insurance'
+import { ContactPicker } from '@/components/contact-picker'
 import { LOAN_DIRECTIONS, LOAN_STATUSES } from '@/lib/constants'
 
 type LoanFormProps = {
@@ -26,17 +26,12 @@ export function LoanForm({ loan }: LoanFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [contacts, setContacts] = useState<Array<{ id: string; display_name: string }>>([])
     const [policies, setPolicies] = useState<Array<{ id: string; policy_subject: string }>>([])
     const [direction, setDirection] = useState(loan?.loan_direction || 'out')
+    const [borrowerContactId, setBorrowerContactId] = useState<string | undefined>(loan?.borrower_contact_id)
+    const [lenderContactId, setLenderContactId] = useState<string | undefined>(loan?.lender_contact_id)
 
     useEffect(() => {
-        getContacts().then((data) => {
-            setContacts(data.map(c => ({
-                id: c.id,
-                display_name: c.display_name || `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company_name || 'Unknown'
-            })))
-        })
         getInsurancePolicies().then((data) => {
             setPolicies(data.map(p => ({
                 id: p.id,
@@ -51,16 +46,14 @@ export function LoanForm({ loan }: LoanFormProps) {
         setError(null)
 
         const formData = new FormData(e.currentTarget)
-        const borrowerContactId = formData.get('borrower_contact_id') as string
-        const lenderContactId = formData.get('lender_contact_id') as string
         const insurancePolicyId = formData.get('insurance_policy_id') as string
         const insuranceValueStr = formData.get('insurance_value') as string
 
         const data: Partial<Loan> = {
             loan_subject: formData.get('loan_subject') as string || undefined,
             loan_direction: formData.get('loan_direction') as string || undefined,
-            borrower_contact_id: borrowerContactId && borrowerContactId !== 'none' ? borrowerContactId : undefined,
-            lender_contact_id: lenderContactId && lenderContactId !== 'none' ? lenderContactId : undefined,
+            borrower_contact_id: borrowerContactId || undefined,
+            lender_contact_id: lenderContactId || undefined,
             exhibition_name: formData.get('exhibition_name') as string || undefined,
             venue: formData.get('venue') as string || undefined,
             loan_start_date: formData.get('loan_start_date') as string || undefined,
@@ -159,38 +152,24 @@ export function LoanForm({ loan }: LoanFormProps) {
                 {direction === 'out' ? (
                     <div className="col-span-2">
                         <Label htmlFor="borrower_contact_id">Borrower</Label>
-                        <Select name="borrower_contact_id" defaultValue={loan?.borrower_contact_id || 'none'}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select borrower..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">None</SelectItem>
-                                {contacts.map((contact) => (
-                                    <SelectItem key={contact.id} value={contact.id}>
-                                        {contact.display_name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="lender_contact_id" value="none" />
+                        <ContactPicker
+                            value={borrowerContactId}
+                            onChange={setBorrowerContactId}
+                            placeholder="Select borrower..."
+                            suggestedType="Museum"
+                            className="w-full"
+                        />
                     </div>
                 ) : (
                     <div className="col-span-2">
                         <Label htmlFor="lender_contact_id">Lender</Label>
-                        <Select name="lender_contact_id" defaultValue={loan?.lender_contact_id || 'none'}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select lender..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">None</SelectItem>
-                                {contacts.map((contact) => (
-                                    <SelectItem key={contact.id} value={contact.id}>
-                                        {contact.display_name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="borrower_contact_id" value="none" />
+                        <ContactPicker
+                            value={lenderContactId}
+                            onChange={setLenderContactId}
+                            placeholder="Select lender..."
+                            suggestedType="Collector"
+                            className="w-full"
+                        />
                     </div>
                 )}
 
