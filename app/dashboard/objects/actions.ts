@@ -58,12 +58,19 @@ type MediaItemInput = {
     is_primary?: boolean
 }
 
+// The form sends dimension values as strings ('' when blank); coerce before insert.
 type DimensionInput = {
     type?: string
-    height?: number
-    width?: number
-    depth?: number
+    height?: number | string
+    width?: number | string
+    depth?: number | string
     unit?: string
+}
+
+function toNumericOrNull(value: number | string | undefined): number | null {
+    if (value === undefined || value === null || value === '') return null
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
 }
 
 type SignableMedia = { r2_key_medium: string | null; signed_url?: string }
@@ -532,15 +539,17 @@ export async function createObject(formData: FormData) {
     // 2. Insert Dimensions
     if (dimensions.length > 0) {
         const { error: dimError } = await supabase.from('object_dimensions').insert(
-            dimensions.map((d) => ({
-                workspace_id: workspaceId,
-                object_id: object.id,
-                type: d.type,
-                height: d.height,
-                width: d.width,
-                depth: d.depth,
-                unit: d.unit,
-            }))
+            dimensions
+                .filter((d) => toNumericOrNull(d.height) !== null || toNumericOrNull(d.width) !== null || toNumericOrNull(d.depth) !== null)
+                .map((d) => ({
+                    workspace_id: workspaceId,
+                    object_id: object.id,
+                    type: d.type,
+                    height: toNumericOrNull(d.height),
+                    width: toNumericOrNull(d.width),
+                    depth: toNumericOrNull(d.depth),
+                    unit: d.unit,
+                }))
         )
         if (dimError) console.error('Failed to insert dimensions:', dimError)
     }
