@@ -18,6 +18,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { WorkspaceSwitcher } from '@/components/workspace-switcher'
+
+type Membership = { workspace_id: string; role: string; name: string }
 
 const navigation = [
     { name: 'Inventory', href: '/dashboard', icon: LayoutGrid },
@@ -33,13 +36,23 @@ const navigation = [
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
-export function Sidebar() {
+export function Sidebar({
+    memberships,
+    activeWorkspaceId,
+}: {
+    memberships: Membership[]
+    activeWorkspaceId: string
+}) {
     const pathname = usePathname()
 
     return (
         <div className="flex h-full w-64 flex-col border-r bg-white">
             <div className="flex h-16 items-center border-b px-6">
                 <span className="text-lg font-bold tracking-tight">DūArte</span>
+            </div>
+
+            <div className="border-b px-3 py-3">
+                <WorkspaceSwitcher memberships={memberships} activeWorkspaceId={activeWorkspaceId} />
             </div>
 
             <div className="p-4">

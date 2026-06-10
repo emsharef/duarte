@@ -19,5 +19,6 @@ export async function login(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    const next = formData.get('next') as string | null
+    redirect(next && next.startsWith('/') ? next : '/dashboard')
 }
