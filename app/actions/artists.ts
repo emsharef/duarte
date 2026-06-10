@@ -1,43 +1,43 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type Artist = {
     id: string
-    first_name?: string
-    last_name?: string
-    company?: string
-    bio?: string
-    birth_year?: number
-    death_year?: number
-    nationality?: string
-    website?: string
-    aka?: string
-    r2_headshot_key?: string
+    first_name?: string | null
+    last_name?: string | null
+    company?: string | null
+    bio?: string | null
+    birth_year?: number | null
+    death_year?: number | null
+    nationality?: string | null
+    website?: string | null
+    aka?: string | null
+    r2_headshot_key?: string | null
 }
 
 export async function getArtists() {
-    const supabase = await createClient()
-    const { data } = await supabase.from('artists').select('*').order('last_name', { ascending: true })
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase.from('artists').select('*').eq('workspace_id', workspaceId).order('last_name', { ascending: true })
     return data || []
 }
 
 export async function getArtist(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase.from('artists').select('*').eq('id', id).single()
     return data
 }
 
 export async function createArtist(data: Partial<Artist>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: artist, error } = await supabase
         .from('artists')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             ...data
         })
         .select()
@@ -49,9 +49,9 @@ export async function createArtist(data: Partial<Artist>) {
 }
 
 export async function updateArtist(id: string, data: Partial<Artist>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     const { data: artist, error } = await supabase
         .from('artists')

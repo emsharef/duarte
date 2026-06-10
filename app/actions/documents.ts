@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 import { r2 } from '@/lib/r2'
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
@@ -8,18 +8,18 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 export type Document = {
     id: string
-    document_type?: string
+    document_type?: string | null
     document_name: string
-    description?: string
+    description?: string | null
     r2_key: string
-    file_size?: number
-    mime_type?: string
-    original_filename?: string
-    document_date?: string
+    file_size?: number | null
+    mime_type?: string | null
+    original_filename?: string | null
+    document_date?: string | null
     created_at?: string
     updated_at?: string
     // Generated
-    signed_url?: string
+    signed_url?: string | null
     // Linked entities
     linked_entities?: Array<{ entity_type: string; entity_id: string }>
 }
@@ -33,19 +33,21 @@ export type EntityDocument = {
 }
 
 export async function getDocuments() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('documents')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: false })
     return data || []
 }
 
 export async function getDocumentsWithUrls() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data: documents } = await supabase
         .from('documents')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: false })
 
     if (!documents) return []
@@ -58,6 +60,7 @@ export async function getDocumentsWithUrls() {
         .in('document_id', documentIds.length > 0 ? documentIds : ['00000000-0000-0000-0000-000000000000'])
 
     const entityMap = (entityLinks || []).reduce((acc, link) => {
+        if (!link.document_id) return acc
         if (!acc[link.document_id]) {
             acc[link.document_id] = []
         }
@@ -92,7 +95,7 @@ export async function getDocumentsWithUrls() {
 }
 
 export async function getDocument(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('documents')
         .select('*')
@@ -129,7 +132,7 @@ export async function getDocument(id: string) {
 }
 
 export async function getDocumentsForEntity(entityType: string, entityId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
 
     // Get document IDs linked to this entity
     const { data: links } = await supabase
@@ -140,7 +143,7 @@ export async function getDocumentsForEntity(entityType: string, entityId: string
 
     if (!links || links.length === 0) return []
 
-    const documentIds = links.map(l => l.document_id)
+    const documentIds = links.map(l => l.document_id).filter((id): id is string => Boolean(id))
 
     const { data: documents } = await supabase
         .from('documents')
@@ -173,9 +176,9 @@ export async function getDocumentsForEntity(entityType: string, entityId: string
 }
 
 export async function uploadDocument(formData: FormData) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const file = formData.get('file') as File
     if (!file) throw new Error('No file provided')
@@ -187,7 +190,7 @@ export async function uploadDocument(formData: FormData) {
 
     // Upload to R2
     const buffer = Buffer.from(await file.arrayBuffer())
-    const key = `${user.id}/documents/${Date.now()}-${file.name}`
+    const key = `${workspaceId}/documents/${Date.now()}-${file.name}`
 
     try {
         const command = new PutObjectCommand({
@@ -206,7 +209,7 @@ export async function uploadDocument(formData: FormData) {
     const { data: document, error } = await supabase
         .from('documents')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             document_type: documentType || null,
             document_name: documentName || file.name,
             description: description || null,
@@ -225,9 +228,9 @@ export async function uploadDocument(formData: FormData) {
 }
 
 export async function updateDocument(id: string, data: Partial<Document>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: document, error } = await supabase
         .from('documents')
@@ -248,9 +251,9 @@ export async function updateDocument(id: string, data: Partial<Document>) {
 }
 
 export async function deleteDocument(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Get the document to find the R2 key
     const { data: doc } = await supabase
@@ -288,13 +291,14 @@ export async function deleteDocument(id: string) {
 }
 
 export async function linkDocumentToEntity(documentId: string, entityType: string, entityId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('entity_documents')
         .insert({
+            workspace_id: workspaceId,
             document_id: documentId,
             entity_type: entityType,
             entity_id: entityId,
@@ -307,9 +311,9 @@ export async function linkDocumentToEntity(documentId: string, entityType: strin
 }
 
 export async function unlinkDocumentFromEntity(documentId: string, entityType: string, entityId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('entity_documents')

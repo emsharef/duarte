@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type InsurancePolicy = {
@@ -25,13 +25,14 @@ export type InsurancePolicy = {
 }
 
 export async function getInsurancePolicies() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('insurance_policies')
         .select(`
             *,
             insurer_contact:contacts!insurer_contact_id(display_name)
         `)
+        .eq('workspace_id', workspaceId)
         .order('end_date', { ascending: false })
 
     // Get object counts for each policy
@@ -39,6 +40,7 @@ export async function getInsurancePolicies() {
         const { data: counts } = await supabase
             .from('object_insurance')
             .select('policy_id')
+            .eq('workspace_id', workspaceId)
 
         const countMap = (counts || []).reduce((acc, row) => {
             acc[row.policy_id] = (acc[row.policy_id] || 0) + 1
@@ -55,20 +57,21 @@ export async function getInsurancePolicies() {
 }
 
 export async function getActiveInsurancePolicies() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('insurance_policies')
         .select(`
             *,
             insurer_contact:contacts!insurer_contact_id(display_name)
         `)
+        .eq('workspace_id', workspaceId)
         .eq('is_active', true)
         .order('policy_subject', { ascending: true })
     return data || []
 }
 
 export async function getInsurancePolicy(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('insurance_policies')
         .select(`
@@ -81,7 +84,7 @@ export async function getInsurancePolicy(id: string) {
 }
 
 export async function getPolicyObjects(policyId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('object_insurance')
         .select(`
@@ -98,14 +101,14 @@ export async function getPolicyObjects(policyId: string) {
 }
 
 export async function createInsurancePolicy(data: Partial<InsurancePolicy>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: policy, error } = await supabase
         .from('insurance_policies')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             ...data
         })
         .select()
@@ -117,9 +120,9 @@ export async function createInsurancePolicy(data: Partial<InsurancePolicy>) {
 }
 
 export async function updateInsurancePolicy(id: string, data: Partial<InsurancePolicy>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: policy, error } = await supabase
         .from('insurance_policies')
@@ -137,9 +140,9 @@ export async function updateInsurancePolicy(id: string, data: Partial<InsuranceP
 }
 
 export async function deleteInsurancePolicy(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('insurance_policies')
@@ -151,13 +154,14 @@ export async function deleteInsurancePolicy(id: string) {
 }
 
 export async function linkObjectToPolicy(objectId: string, policyId: string, insuredValue?: number) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('object_insurance')
         .insert({
+            workspace_id: workspaceId,
             object_id: objectId,
             policy_id: policyId,
             insured_value: insuredValue
@@ -176,9 +180,9 @@ export async function linkObjectToPolicy(objectId: string, policyId: string, ins
 }
 
 export async function unlinkObjectFromPolicy(objectId: string, policyId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('object_insurance')
@@ -197,7 +201,7 @@ export async function unlinkObjectFromPolicy(objectId: string, policyId: string)
     // Update is_insured flag based on remaining policies
     await supabase
         .from('objects')
-        .update({ is_insured: (remaining && remaining.length > 0) })
+        .update({ is_insured: !!(remaining && remaining.length > 0) })
         .eq('id', objectId)
 
     revalidatePath('/dashboard/insurance')
@@ -205,7 +209,7 @@ export async function unlinkObjectFromPolicy(objectId: string, policyId: string)
 }
 
 export async function getObjectInsurance(objectId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('object_insurance')
         .select(`

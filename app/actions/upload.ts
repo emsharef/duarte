@@ -2,18 +2,12 @@
 
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2 } from '@/lib/r2'
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 
 export async function uploadImage(formData: FormData) {
-    console.log('Server Action: uploadImage called')
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-        throw new Error('Unauthorized')
-    }
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { workspaceId } = ctx
 
     const file = formData.get('file') as File
     if (!file) {
@@ -21,7 +15,7 @@ export async function uploadImage(formData: FormData) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const key = `${user.id}/${Date.now()}-${file.name}`
+    const key = `${workspaceId}/${Date.now()}-${file.name}`
 
     try {
         const command = new PutObjectCommand({

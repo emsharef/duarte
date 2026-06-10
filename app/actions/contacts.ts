@@ -1,45 +1,47 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type Contact = {
     id: string
-    contact_type?: string
-    first_name?: string
-    last_name?: string
-    company_name?: string
-    display_name?: string
-    email?: string
-    phone?: string
-    mobile?: string
-    website?: string
-    address_line1?: string
-    address_line2?: string
-    city?: string
-    state?: string
-    postal_code?: string
-    country?: string
-    notes?: string
+    contact_type?: string | null
+    first_name?: string | null
+    last_name?: string | null
+    company_name?: string | null
+    display_name?: string | null
+    email?: string | null
+    phone?: string | null
+    mobile?: string | null
+    website?: string | null
+    address_line1?: string | null
+    address_line2?: string | null
+    city?: string | null
+    state?: string | null
+    postal_code?: string | null
+    country?: string | null
+    notes?: string | null
     is_active?: boolean
     created_at?: string
     updated_at?: string
 }
 
 export async function getContacts() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('contacts')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .order('display_name', { ascending: true })
     return data || []
 }
 
 export async function getContactsByType(type: string) {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('contacts')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .eq('contact_type', type)
         .eq('is_active', true)
         .order('display_name', { ascending: true })
@@ -47,7 +49,7 @@ export async function getContactsByType(type: string) {
 }
 
 export async function getContact(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('contacts')
         .select('*')
@@ -57,9 +59,9 @@ export async function getContact(id: string) {
 }
 
 export async function createContact(data: Partial<Contact>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Generate display_name if not provided
     const display_name = data.display_name ||
@@ -70,7 +72,7 @@ export async function createContact(data: Partial<Contact>) {
     const { data: contact, error } = await supabase
         .from('contacts')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             ...data,
             display_name
         })
@@ -83,9 +85,9 @@ export async function createContact(data: Partial<Contact>) {
 }
 
 export async function updateContact(id: string, data: Partial<Contact>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     // Update display_name if name fields changed
     const display_name = data.display_name ||
@@ -109,9 +111,9 @@ export async function updateContact(id: string, data: Partial<Contact>) {
 }
 
 export async function deleteContact(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     const { error } = await supabase
         .from('contacts')

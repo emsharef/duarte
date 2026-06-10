@@ -27,9 +27,9 @@ export function LoanForm({ loan }: LoanFormProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [policies, setPolicies] = useState<Array<{ id: string; policy_subject: string }>>([])
-    const [direction, setDirection] = useState(loan?.loan_direction || 'out')
-    const [borrowerContactId, setBorrowerContactId] = useState<string | undefined>(loan?.borrower_contact_id)
-    const [lenderContactId, setLenderContactId] = useState<string | undefined>(loan?.lender_contact_id)
+    const [direction, setDirection] = useState(loan?.direction || 'out')
+    const [borrowerContactId, setBorrowerContactId] = useState<string | undefined>(loan?.borrower_contact_id ?? undefined)
+    const [lenderContactId, setLenderContactId] = useState<string | undefined>(loan?.lender_contact_id ?? undefined)
 
     useEffect(() => {
         getInsurancePolicies().then((data) => {
@@ -51,17 +51,17 @@ export function LoanForm({ loan }: LoanFormProps) {
 
         const data: Partial<Loan> = {
             loan_subject: formData.get('loan_subject') as string || undefined,
-            loan_direction: formData.get('loan_direction') as string || undefined,
+            direction: formData.get('direction') as string || undefined,
             borrower_contact_id: borrowerContactId || undefined,
             lender_contact_id: lenderContactId || undefined,
             exhibition_name: formData.get('exhibition_name') as string || undefined,
             venue: formData.get('venue') as string || undefined,
-            loan_start_date: formData.get('loan_start_date') as string || undefined,
-            loan_end_date: formData.get('loan_end_date') as string || undefined,
+            start_date: formData.get('start_date') as string || undefined,
+            end_date: formData.get('end_date') as string || undefined,
             actual_return_date: formData.get('actual_return_date') as string || undefined,
             insurance_value: insuranceValueStr ? parseFloat(insuranceValueStr) : undefined,
             insurance_policy_id: insurancePolicyId && insurancePolicyId !== 'none' ? insurancePolicyId : undefined,
-            loan_status: formData.get('loan_status') as string || 'Pending',
+            status: formData.get('status') as string || 'Pending',
             currency: formData.get('currency') as string || 'USD',
             notes: formData.get('notes') as string || undefined,
         }
@@ -117,10 +117,10 @@ export function LoanForm({ loan }: LoanFormProps) {
                 </div>
 
                 <div>
-                    <Label htmlFor="loan_direction">Direction *</Label>
+                    <Label htmlFor="direction">Direction *</Label>
                     <Select
-                        name="loan_direction"
-                        defaultValue={loan?.loan_direction || 'out'}
+                        name="direction"
+                        defaultValue={loan?.direction || 'out'}
                         onValueChange={(value) => setDirection(value)}
                     >
                         <SelectTrigger>
@@ -134,8 +134,8 @@ export function LoanForm({ loan }: LoanFormProps) {
                 </div>
 
                 <div>
-                    <Label htmlFor="loan_status">Status</Label>
-                    <Select name="loan_status" defaultValue={loan?.loan_status || 'Pending'}>
+                    <Label htmlFor="status">Status</Label>
+                    <Select name="status" defaultValue={loan?.status || 'Pending'}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select status..." />
                         </SelectTrigger>
@@ -200,22 +200,22 @@ export function LoanForm({ loan }: LoanFormProps) {
                 </div>
 
                 <div>
-                    <Label htmlFor="loan_start_date">Start Date</Label>
+                    <Label htmlFor="start_date">Start Date</Label>
                     <Input
-                        id="loan_start_date"
-                        name="loan_start_date"
+                        id="start_date"
+                        name="start_date"
                         type="date"
-                        defaultValue={loan?.loan_start_date || ''}
+                        defaultValue={loan?.start_date || ''}
                     />
                 </div>
 
                 <div>
-                    <Label htmlFor="loan_end_date">End Date</Label>
+                    <Label htmlFor="end_date">End Date</Label>
                     <Input
-                        id="loan_end_date"
-                        name="loan_end_date"
+                        id="end_date"
+                        name="end_date"
                         type="date"
-                        defaultValue={loan?.loan_end_date || ''}
+                        defaultValue={loan?.end_date || ''}
                     />
                 </div>
 

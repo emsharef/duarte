@@ -27,7 +27,7 @@ function getStatusColor(status?: string) {
     }
 }
 
-function formatDate(dateStr?: string) {
+function formatDate(dateStr?: string | null) {
     if (!dateStr) return '-'
     return new Date(dateStr).toLocaleDateString()
 }
@@ -71,22 +71,22 @@ export default async function LoansPage() {
                                     {loan.loan_subject || 'Untitled Loan'}
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={loan.loan_direction === 'out' ? 'default' : 'secondary'}>
-                                        {loan.loan_direction === 'out' ? 'Loan Out' : 'Loan In'}
+                                    <Badge variant={loan.direction === 'out' ? 'default' : 'secondary'}>
+                                        {loan.direction === 'out' ? 'Loan Out' : 'Loan In'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    {loan.loan_direction === 'out'
+                                    {loan.direction === 'out'
                                         ? (loan.borrower?.display_name || loan.borrower?.company_name || '-')
                                         : (loan.lender?.display_name || loan.lender?.company_name || '-')
                                     }
                                 </TableCell>
-                                <TableCell>{formatDate(loan.loan_start_date)}</TableCell>
-                                <TableCell>{formatDate(loan.loan_end_date)}</TableCell>
+                                <TableCell>{formatDate(loan.start_date)}</TableCell>
+                                <TableCell>{formatDate(loan.end_date)}</TableCell>
                                 <TableCell className="text-center">{loan.object_count || 0}</TableCell>
                                 <TableCell>
-                                    <Badge variant={getStatusColor(loan.loan_status)}>
-                                        {loan.loan_status || 'Pending'}
+                                    <Badge variant={getStatusColor(loan.status)}>
+                                        {loan.status || 'Pending'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">

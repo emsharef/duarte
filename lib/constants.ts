@@ -1,3 +1,30 @@
+// Object lifecycle statuses (must match the objects.status check constraint)
+export const OBJECT_STATUSES = [
+    'in_collection',
+    'on_loan',
+    'on_consignment',
+    'sold',
+    'traded',
+    'gifted',
+    'donated',
+    'lost',
+    'destroyed',
+    'deaccessioned',
+] as const
+
+export const OBJECT_STATUS_LABELS: Record<string, string> = {
+    in_collection: 'In collection',
+    on_loan: 'On loan',
+    on_consignment: 'On consignment',
+    sold: 'Sold',
+    traded: 'Traded',
+    gifted: 'Gifted',
+    donated: 'Donated',
+    lost: 'Lost',
+    destroyed: 'Destroyed',
+    deaccessioned: 'Deaccessioned',
+}
+
 // Contact types
 export const CONTACT_TYPES = [
     'Person',

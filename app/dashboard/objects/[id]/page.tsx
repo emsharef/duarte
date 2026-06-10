@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { OBJECT_STATUSES, OBJECT_STATUS_LABELS } from '@/lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
     Select,
@@ -87,8 +88,8 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
     const [deleting, setDeleting] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [dimensions, setDimensions] = useState<Dimension[]>([])
-    const [artists, setArtists] = useState<any[]>([])
-    const [categories, setCategories] = useState<any[]>([])
+    const [artists, setArtists] = useState<{ id: string; first_name?: string | null; last_name?: string | null; company?: string | null }[]>([])
+    const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
     const [selectedLocation, setSelectedLocation] = useState<string | undefined>()
     const [selectedArtist, setSelectedArtist] = useState<string>('')
     const [artistSearch, setArtistSearch] = useState('')
@@ -334,8 +335,8 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                         {/* Status Badges */}
                         <div className="flex gap-2 flex-wrap">
                             {object.status && (
-                                <Badge variant={object.status === 'Available' ? 'default' : object.status === 'Sold' ? 'secondary' : 'outline'}>
-                                    {object.status}
+                                <Badge variant={object.status === 'in_collection' ? 'default' : object.status === 'sold' ? 'secondary' : 'outline'}>
+                                    {OBJECT_STATUS_LABELS[object.status] ?? object.status}
                                 </Badge>
                             )}
                             {activeLoan && (
@@ -517,7 +518,7 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                     </div>
                                     {activeInsurance ? (
                                         <p className="text-muted-foreground">
-                                            {activeInsurance.policy?.provider || formatContactName(activeInsurance.policy?.insurer)}
+                                            {activeInsurance.policy?.policy_subject || formatContactName(activeInsurance.policy?.insurer)}
                                             {activeInsurance.insured_value && ` · ${formatCurrency(activeInsurance.insured_value)}`}
                                             {activeInsurance.policy?.end_date && ` · Expires ${formatDate(activeInsurance.policy.end_date)}`}
                                         </p>
@@ -558,7 +559,7 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                                     <div className="flex items-center gap-3">
                                                         <FileText className="h-8 w-8 text-blue-500" />
                                                         <div>
-                                                            <p className="font-medium">{doc.document?.name}</p>
+                                                            <p className="font-medium">{doc.document?.document_name}</p>
                                                             <p className="text-sm text-muted-foreground">
                                                                 {doc.document?.document_type} • {formatDate(doc.document?.created_at)}
                                                             </p>
@@ -609,7 +610,7 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                             </h3>
                                             <div className="space-y-2">
                                                 {object.loans.map((loan) => (
-                                                    <Card key={loan.id} className="p-4">
+                                                    <Card key={loan.loan.id} className="p-4">
                                                         <div className="flex justify-between items-start">
                                                             <div>
                                                                 <p className="font-medium">
@@ -630,14 +631,6 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                         </div>
                                     )}
 
-                                    {/* Exhibition History */}
-                                    {object.exhibition_history && (
-                                        <div>
-                                            <h3 className="font-semibold mb-2">Exhibition History</h3>
-                                            <p className="text-muted-foreground whitespace-pre-wrap">{object.exhibition_history}</p>
-                                        </div>
-                                    )}
-
                                     {/* Condition */}
                                     {object.condition_description && (
                                         <div>
@@ -646,7 +639,7 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                         </div>
                                     )}
 
-                                    {!object.loans?.length && !object.exhibition_history && !object.condition_description && (
+                                    {!object.loans?.length && !object.condition_description && (
                                         <Card className="p-8 text-center border-dashed">
                                             <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                                             <h3 className="font-medium mb-1">No History Yet</h3>
@@ -684,8 +677,8 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                                             <p className="text-sm text-muted-foreground">
                                                                 {formatContactName(val.valuation?.appraiser)} • {formatDate(val.valuation?.valuation_date)}
                                                             </p>
-                                                            {val.valuation?.purpose && (
-                                                                <Badge variant="outline" className="mt-1">{val.valuation.purpose}</Badge>
+                                                            {val.valuation?.value_type && (
+                                                                <Badge variant="outline" className="mt-1">{val.valuation.value_type}</Badge>
                                                             )}
                                                         </div>
                                                         {val.low_estimate && val.high_estimate && (
@@ -761,10 +754,10 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                     {object.insurance && object.insurance.length > 0 ? (
                                         <div className="space-y-2">
                                             {object.insurance.map((ins) => (
-                                                <Card key={ins.id} className="p-4">
+                                                <Card key={ins.policy.id} className="p-4">
                                                     <div className="flex justify-between items-start">
                                                         <div>
-                                                            <p className="font-medium">{ins.policy?.provider || formatContactName(ins.policy?.insurer)}</p>
+                                                            <p className="font-medium">{ins.policy?.policy_subject || formatContactName(ins.policy?.insurer)}</p>
                                                             <p className="text-sm text-muted-foreground">
                                                                 Policy #{ins.policy?.policy_number} • {ins.policy?.coverage_type}
                                                             </p>
@@ -852,14 +845,14 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                                         <CommandEmpty>
                                                             <Button variant="ghost" className="w-full justify-start" onClick={handleCreateArtist}>
                                                                 <Plus className="mr-2 h-4 w-4" />
-                                                                Create "{artistSearch}"
+                                                                Create &quot;{artistSearch}&quot;
                                                             </Button>
                                                         </CommandEmpty>
                                                         <CommandGroup>
                                                             {artists.map((artist) => (
                                                                 <CommandItem
                                                                     key={artist.id}
-                                                                    value={`${artist.first_name || ''} ${artist.last_name || ''}`.trim() || artist.company}
+                                                                    value={`${artist.first_name || ''} ${artist.last_name || ''}`.trim() || artist.company || ''}
                                                                     onSelect={() => { setSelectedArtist(artist.id); setArtistOpen(false) }}
                                                                 >
                                                                     <Check className={cn("mr-2 h-4 w-4", selectedArtist === artist.id ? "opacity-100" : "opacity-0")} />
@@ -890,12 +883,12 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="status">Status</Label>
-                                        <Select name="status" defaultValue={object.status || 'Available'}>
+                                        <Select name="status" defaultValue={object.status || 'in_collection'}>
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Available">Available</SelectItem>
-                                                <SelectItem value="Sold">Sold</SelectItem>
-                                                <SelectItem value="Loaned">Loaned</SelectItem>
+                                                {OBJECT_STATUSES.map(s => (
+                                                    <SelectItem key={s} value={s}>{OBJECT_STATUS_LABELS[s]}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -986,10 +979,6 @@ export default function ObjectDetailPage({ params }: { params: Promise<{ id: str
                                 <div className="grid gap-2">
                                     <Label htmlFor="provenance">Provenance</Label>
                                     <Textarea id="provenance" name="provenance" defaultValue={object.provenance || ''} rows={2} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="exhibition_history">Exhibition History</Label>
-                                    <Textarea id="exhibition_history" name="exhibition_history" defaultValue={object.exhibition_history || ''} rows={2} />
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <input type="checkbox" id="is_framed" name="is_framed" value="true" defaultChecked={object.is_framed} className="h-4 w-4 rounded border-gray-300" />

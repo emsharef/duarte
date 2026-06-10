@@ -2,21 +2,23 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NextResponse } from 'next/server'
 import { r2 } from '@/lib/r2'
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext } from '@/lib/workspace'
 
 export async function POST(request: Request) {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    let workspaceId: string
+    try {
+        const ctx = await getWorkspaceContext()
+        if (ctx.role === 'viewer') {
+            return NextResponse.json({ error: 'Read-only access' }, { status: 403 })
+        }
+        workspaceId = ctx.workspaceId
+    } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
         const { filename, contentType } = await request.json()
-        const key = `${user.id}/${Date.now()}-${filename}`
+        const key = `${workspaceId}/${Date.now()}-${filename}`
 
         const command = new PutObjectCommand({
             Bucket: process.env.R2_BUCKET_NAME,

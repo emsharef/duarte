@@ -1,30 +1,30 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type Acquisition = {
     id: string
-    acquisition_subject?: string
-    acquisition_date?: string
-    acquired_from_contact_id?: string
-    acquisition_type?: string
-    bought_by_contact_id?: string
-    acquisition_price?: number
+    acquisition_subject?: string | null
+    acquisition_date?: string | null
+    acquired_from_contact_id?: string | null
+    acquisition_type?: string | null
+    bought_by_contact_id?: string | null
+    acquisition_price?: number | null
     currency?: string
-    exchange_rate?: number
-    acquisition_discount?: number
-    buyer_premium?: number
-    taxes?: number
-    total_cost?: number
-    invoice_number?: string
-    invoice_date?: string
-    notes?: string
+    exchange_rate?: number | null
+    acquisition_discount?: number | null
+    buyer_premium?: number | null
+    taxes?: number | null
+    total_cost?: number | null
+    invoice_number?: string | null
+    invoice_date?: string | null
+    notes?: string | null
     created_at?: string
     updated_at?: string
     // Joined data
-    acquired_from_contact?: { display_name: string }
-    bought_by_contact?: { display_name: string }
+    acquired_from_contact?: { display_name: string | null } | null
+    bought_by_contact?: { display_name: string | null } | null
     object_count?: number
 }
 
@@ -39,7 +39,7 @@ export type ObjectAcquisitionData = {
 }
 
 export async function getAcquisitions() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('acquisitions')
         .select(`
@@ -47,6 +47,7 @@ export async function getAcquisitions() {
             acquired_from_contact:contacts!acquired_from_contact_id(display_name),
             bought_by_contact:contacts!bought_by_contact_id(display_name)
         `)
+        .eq('workspace_id', workspaceId)
         .order('acquisition_date', { ascending: false })
 
     // Get object counts for each acquisition
@@ -54,6 +55,7 @@ export async function getAcquisitions() {
         const { data: counts } = await supabase
             .from('object_acquisitions')
             .select('acquisition_id')
+            .eq('workspace_id', workspaceId)
 
         const countMap = (counts || []).reduce((acc, row) => {
             acc[row.acquisition_id] = (acc[row.acquisition_id] || 0) + 1
@@ -70,7 +72,7 @@ export async function getAcquisitions() {
 }
 
 export async function getAcquisition(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('acquisitions')
         .select(`
@@ -84,7 +86,7 @@ export async function getAcquisition(id: string) {
 }
 
 export async function getAcquisitionObjects(acquisitionId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('object_acquisitions')
         .select(`
@@ -105,14 +107,14 @@ export async function getAcquisitionObjects(acquisitionId: string) {
 }
 
 export async function createAcquisition(data: Partial<Acquisition>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: acquisition, error } = await supabase
         .from('acquisitions')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             ...data
         })
         .select()
@@ -124,9 +126,9 @@ export async function createAcquisition(data: Partial<Acquisition>) {
 }
 
 export async function updateAcquisition(id: string, data: Partial<Acquisition>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: acquisition, error } = await supabase
         .from('acquisitions')
@@ -144,9 +146,9 @@ export async function updateAcquisition(id: string, data: Partial<Acquisition>) 
 }
 
 export async function deleteAcquisition(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('acquisitions')
@@ -163,9 +165,9 @@ export async function linkObjectToAcquisition(
     objectData: ObjectAcquisitionData | number | undefined,
     isUpdate: boolean = false
 ) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Handle backwards compatibility - if objectData is a number, treat it as object_price
     const data = typeof objectData === 'number'
@@ -194,6 +196,7 @@ export async function linkObjectToAcquisition(
         const { error } = await supabase
             .from('object_acquisitions')
             .insert({
+                workspace_id: workspaceId,
                 object_id: objectId,
                 acquisition_id: acquisitionId,
                 ...data
@@ -208,9 +211,9 @@ export async function linkObjectToAcquisition(
 }
 
 export async function unlinkObjectFromAcquisition(objectId: string, acquisitionId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('object_acquisitions')

@@ -1,20 +1,21 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
+import type { TablesInsert } from '@/lib/database.types'
 
 export type Location = {
     id: string
     name: string
-    type?: string
-    description?: string
-    address_line1?: string
-    address_line2?: string
-    city?: string
-    state?: string
-    postal_code?: string
-    country?: string
-    parent_id?: string
+    type?: string | null
+    description?: string | null
+    address_line1?: string | null
+    address_line2?: string | null
+    city?: string | null
+    state?: string | null
+    postal_code?: string | null
+    country?: string | null
+    parent_id?: string | null
     created_at?: string
     updated_at?: string
     // Joined data
@@ -24,19 +25,21 @@ export type Location = {
 }
 
 export async function getLocations() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('locations')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .order('name', { ascending: true })
     return data || []
 }
 
 export async function getLocationsWithCounts() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data: locations } = await supabase
         .from('locations')
         .select('*')
+        .eq('workspace_id', workspaceId)
         .order('name', { ascending: true })
 
     if (!locations) return []
@@ -45,6 +48,7 @@ export async function getLocationsWithCounts() {
     const { data: objectCounts } = await supabase
         .from('objects')
         .select('location_id')
+        .eq('workspace_id', workspaceId)
 
     const objectCountMap = (objectCounts || []).reduce((acc, obj) => {
         if (obj.location_id) {
@@ -76,7 +80,7 @@ export async function getLocationsWithCounts() {
 }
 
 export async function getLocation(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('locations')
         .select('*')
@@ -86,14 +90,14 @@ export async function getLocation(id: string) {
 }
 
 export async function createLocation(data: Partial<Location>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Build insert object with only fields that exist in the database
-    const insertData: Record<string, unknown> = {
-        user_id: user.id,
-        name: data.name,
+    const insertData: TablesInsert<'locations'> = {
+        workspace_id: workspaceId,
+        name: data.name!,
     }
 
     // Add optional fields if provided
@@ -113,9 +117,9 @@ export async function createLocation(data: Partial<Location>) {
 }
 
 export async function updateLocation(id: string, data: Partial<Location>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     // Build update object with only core fields that exist in the database
     const updateData: Record<string, unknown> = {
@@ -139,14 +143,15 @@ export async function updateLocation(id: string, data: Partial<Location>) {
 }
 
 export async function deleteLocation(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Check if location has children
     const { data: children } = await supabase
         .from('locations')
         .select('id')
+        .eq('workspace_id', workspaceId)
         .eq('parent_id', id)
 
     if (children && children.length > 0) {
@@ -157,6 +162,7 @@ export async function deleteLocation(id: string) {
     const { data: objects } = await supabase
         .from('objects')
         .select('id')
+        .eq('workspace_id', workspaceId)
         .eq('location_id', id)
 
     if (objects && objects.length > 0) {

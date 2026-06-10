@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type Valuation = {
@@ -32,13 +33,14 @@ export type ObjectValuation = {
 }
 
 export async function getValuations() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('valuations')
         .select(`
             *,
             appraiser_contact:contacts!appraiser_contact_id(display_name)
         `)
+        .eq('workspace_id', workspaceId)
         .order('valuation_date', { ascending: false })
 
     // Get object counts for each valuation
@@ -46,9 +48,12 @@ export async function getValuations() {
         const { data: counts } = await supabase
             .from('object_valuations')
             .select('valuation_id')
+            .eq('workspace_id', workspaceId)
 
         const countMap = (counts || []).reduce((acc, row) => {
-            acc[row.valuation_id] = (acc[row.valuation_id] || 0) + 1
+            if (row.valuation_id) {
+                acc[row.valuation_id] = (acc[row.valuation_id] || 0) + 1
+            }
             return acc
         }, {} as Record<string, number>)
 
@@ -62,7 +67,7 @@ export async function getValuations() {
 }
 
 export async function getValuation(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('valuations')
         .select(`
@@ -75,7 +80,7 @@ export async function getValuation(id: string) {
 }
 
 export async function getValuationObjects(valuationId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('object_valuations')
         .select(`
@@ -96,14 +101,14 @@ export async function getValuationObjects(valuationId: string) {
 }
 
 export async function createValuation(data: Partial<Valuation>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: valuation, error } = await supabase
         .from('valuations')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             valuation_status: 'Pending',
             ...data
         })
@@ -116,9 +121,9 @@ export async function createValuation(data: Partial<Valuation>) {
 }
 
 export async function updateValuation(id: string, data: Partial<Valuation>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: valuation, error } = await supabase
         .from('valuations')
@@ -136,9 +141,9 @@ export async function updateValuation(id: string, data: Partial<Valuation>) {
 }
 
 export async function deleteValuation(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { error } = await supabase
         .from('valuations')
@@ -159,13 +164,14 @@ export async function addObjectToValuation(
         notes?: string
     }
 ) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data, error } = await supabase
         .from('object_valuations')
         .insert({
+            workspace_id: workspaceId,
             valuation_id: valuationId,
             object_id: objectId,
             ...values
@@ -191,9 +197,9 @@ export async function updateObjectValuation(
         notes?: string
     }
 ) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Get valuation_id first
     const { data: objVal } = await supabase
@@ -212,7 +218,7 @@ export async function updateObjectValuation(
     if (error) throw new Error(error.message)
 
     // Update total value
-    if (objVal) {
+    if (objVal?.valuation_id) {
         await recalculateValuationTotal(objVal.valuation_id)
     }
 
@@ -221,9 +227,9 @@ export async function updateObjectValuation(
 }
 
 export async function removeObjectFromValuation(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Get valuation_id first
     const { data: objVal } = await supabase
@@ -240,7 +246,7 @@ export async function removeObjectFromValuation(id: string) {
     if (error) throw new Error(error.message)
 
     // Update total value
-    if (objVal) {
+    if (objVal?.valuation_id) {
         await recalculateValuationTotal(objVal.valuation_id)
     }
 
@@ -267,7 +273,7 @@ async function recalculateValuationTotal(valuationId: string) {
 }
 
 export async function getObjectValuations(objectId: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('object_valuations')
         .select(`

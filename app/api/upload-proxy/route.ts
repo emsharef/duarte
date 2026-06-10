@@ -1,16 +1,18 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2 } from '@/lib/r2'
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext } from '@/lib/workspace'
 import { NextResponse } from 'next/server'
 import sharp from 'sharp'
 
 export async function POST(request: Request) {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    let workspaceId: string
+    try {
+        const ctx = await getWorkspaceContext()
+        if (ctx.role === 'viewer') {
+            return NextResponse.json({ error: 'Read-only access' }, { status: 403 })
+        }
+        workspaceId = ctx.workspaceId
+    } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
 
         const buffer = Buffer.from(await file.arrayBuffer())
         const timestamp = Date.now()
-        const baseKey = `${user.id}/${timestamp}-${file.name}`
+        const baseKey = `${workspaceId}/${timestamp}-${file.name}`
 
         // Upload Original
         await r2.send(new PutObjectCommand({
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
             const mediumBuffer = await sharp(buffer)
                 .resize(800, null, { withoutEnlargement: true })
                 .toBuffer()
-            mediumKey = `${user.id}/${timestamp}-medium-${file.name}`
+            mediumKey = `${workspaceId}/${timestamp}-medium-${file.name}`
             await r2.send(new PutObjectCommand({
                 Bucket: process.env.R2_BUCKET_NAME,
                 Key: mediumKey,
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
             const thumbnailBuffer = await sharp(buffer)
                 .resize(200, null, { withoutEnlargement: true })
                 .toBuffer()
-            thumbnailKey = `${user.id}/${timestamp}-thumbnail-${file.name}`
+            thumbnailKey = `${workspaceId}/${timestamp}-thumbnail-${file.name}`
             await r2.send(new PutObjectCommand({
                 Bucket: process.env.R2_BUCKET_NAME,
                 Key: thumbnailKey,

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext } from '@/lib/workspace'
 import { r2 } from '@/lib/r2'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
@@ -6,7 +6,7 @@ import { ArtworkTable } from '@/components/artwork-table'
 import { columns } from '@/components/columns'
 
 export default async function DashboardPage() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
 
     // Fetch objects with related data
     const { data: objects, error } = await supabase
@@ -16,6 +16,7 @@ export default async function DashboardPage() {
       artists (first_name, last_name, company),
       object_media (r2_key_thumbnail, is_primary)
     `)
+        .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
         (objects || []).map(async (obj) => {
             let signedUrl = null
             // Find primary image or first available
-            const primaryMedia = obj.object_media?.find((m: any) => m.is_primary) || obj.object_media?.[0]
+            const primaryMedia = obj.object_media?.find((m) => m.is_primary) || obj.object_media?.[0]
 
             if (primaryMedia?.r2_key_thumbnail) {
                 try {

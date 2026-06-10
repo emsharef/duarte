@@ -31,6 +31,7 @@ import {
 import { createObject, getLocations, getCategories } from '../actions'
 import { getArtists, createArtist } from '@/app/actions/artists'
 import { cn } from '@/lib/utils'
+import { OBJECT_STATUSES, OBJECT_STATUS_LABELS } from '@/lib/constants'
 
 type MediaItem = {
     id: string
@@ -56,9 +57,9 @@ export default function NewObjectPage() {
     const [dimensions, setDimensions] = useState<Dimension[]>([
         { id: '1', type: 'dimensions', height: '', width: '', depth: '', unit: 'cm' }
     ])
-    const [artists, setArtists] = useState<any[]>([])
-    const [locations, setLocations] = useState<any[]>([])
-    const [categories, setCategories] = useState<any[]>([])
+    const [artists, setArtists] = useState<{ id: string; first_name?: string | null; last_name?: string | null; company?: string | null }[]>([])
+    const [locations, setLocations] = useState<{ id: string; name: string; type?: string | null }[]>([])
+    const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
     const [selectedArtist, setSelectedArtist] = useState<string>('')
     const [artistSearch, setArtistSearch] = useState('')
     const [artistOpen, setArtistOpen] = useState(false)
@@ -191,7 +192,7 @@ export default function NewObjectPage() {
                                                                 onClick={handleCreateArtist}
                                                             >
                                                                 <Plus className="mr-2 h-4 w-4" />
-                                                                Create "{artistSearch}"
+                                                                Create &quot;{artistSearch}&quot;
                                                             </Button>
                                                         </CommandEmpty>
                                                         <CommandGroup>
@@ -243,14 +244,14 @@ export default function NewObjectPage() {
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="status">Status</Label>
-                                        <Select name="status" defaultValue="Available">
+                                        <Select name="status" defaultValue="in_collection">
                                             <SelectTrigger>
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Available">Available</SelectItem>
-                                                <SelectItem value="Sold">Sold</SelectItem>
-                                                <SelectItem value="Loaned">Loaned</SelectItem>
+                                                {OBJECT_STATUSES.map(s => (
+                                                    <SelectItem key={s} value={s}>{OBJECT_STATUS_LABELS[s]}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -396,10 +397,6 @@ export default function NewObjectPage() {
                                 <div className="grid gap-2">
                                     <Label htmlFor="provenance">Provenance</Label>
                                     <Textarea id="provenance" name="provenance" placeholder="History of ownership..." rows={2} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="exhibition_history">Exhibition History</Label>
-                                    <Textarea id="exhibition_history" name="exhibition_history" placeholder="Previous exhibitions..." rows={2} />
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <input

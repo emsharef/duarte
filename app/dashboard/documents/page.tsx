@@ -12,12 +12,12 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 
-function formatDate(dateStr?: string) {
+function formatDate(dateStr?: string | null) {
     if (!dateStr) return '-'
     return new Date(dateStr).toLocaleDateString()
 }
 
-function formatFileSize(bytes?: number) {
+function formatFileSize(bytes?: number | null) {
     if (!bytes) return '-'
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`

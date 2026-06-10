@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { r2 } from '@/lib/r2'
@@ -23,9 +23,8 @@ export type ArtObject = {
     signature_info?: string
     condition_description?: string
     provenance?: string
-    exhibition_history?: string
     is_framed?: boolean
-    custom_fields?: Record<string, any>
+    custom_fields?: Record<string, unknown>
     created_at?: string
     updated_at?: string
     // Joined data
@@ -52,8 +51,42 @@ export type ArtObject = {
     }>
 }
 
+type MediaItemInput = {
+    keys: { original: string; medium?: string; thumbnail?: string }
+    name?: string
+    description?: string
+    is_primary?: boolean
+}
+
+type DimensionInput = {
+    type?: string
+    height?: number
+    width?: number
+    depth?: number
+    unit?: string
+}
+
+type SignableMedia = { r2_key_medium: string | null; signed_url?: string }
+
+async function signMediaUrls(media: SignableMedia[] | null | undefined) {
+    if (!media || media.length === 0) return
+    for (const item of media) {
+        if (item.r2_key_medium) {
+            try {
+                const command = new GetObjectCommand({
+                    Bucket: process.env.R2_BUCKET_NAME,
+                    Key: item.r2_key_medium,
+                })
+                item.signed_url = await getSignedUrl(r2, command, { expiresIn: 3600 })
+            } catch (err) {
+                console.error('Error generating signed URL:', err)
+            }
+        }
+    }
+}
+
 export async function getObject(id: string): Promise<ArtObject | null> {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data, error } = await supabase
         .from('objects')
         .select(`
@@ -73,24 +106,9 @@ export async function getObject(id: string): Promise<ArtObject | null> {
     }
     if (!data) return null
 
-    // Generate signed URLs for media
-    if (data.object_media && data.object_media.length > 0) {
-        for (const media of data.object_media) {
-            if (media.r2_key_medium) {
-                try {
-                    const command = new GetObjectCommand({
-                        Bucket: process.env.R2_BUCKET_NAME,
-                        Key: media.r2_key_medium,
-                    })
-                    media.signed_url = await getSignedUrl(r2, command, { expiresIn: 3600 })
-                } catch (err) {
-                    console.error('Error generating signed URL:', err)
-                }
-            }
-        }
-    }
+    await signMediaUrls(data.object_media)
 
-    return data
+    return data as ArtObject
 }
 
 // Extended type for object with all relations
@@ -113,7 +131,6 @@ export type ObjectWithRelations = ArtObject & {
         }
     }>
     loans?: Array<{
-        id: string
         loan_value?: number
         condition_out?: string
         condition_in?: string
@@ -129,12 +146,11 @@ export type ObjectWithRelations = ArtObject & {
         }
     }>
     insurance?: Array<{
-        id: string
         insured_value?: number
         policy: {
             id: string
             policy_number?: string
-            provider?: string
+            policy_subject?: string
             coverage_type?: string
             start_date?: string
             end_date?: string
@@ -151,7 +167,7 @@ export type ObjectWithRelations = ArtObject & {
         valuation: {
             id: string
             valuation_date?: string
-            purpose?: string
+            value_type?: string
             currency?: string
             appraiser?: { id: string; first_name?: string; last_name?: string; display_name?: string }
         }
@@ -160,7 +176,7 @@ export type ObjectWithRelations = ArtObject & {
         id: string
         document: {
             id: string
-            name: string
+            document_name: string
             document_type?: string
             r2_key?: string
             file_size?: number
@@ -179,7 +195,7 @@ export type ObjectWithRelations = ArtObject & {
 }
 
 export async function getObjectWithRelations(id: string): Promise<ObjectWithRelations | null> {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
 
     // Get base object with core relations
     const { data: object, error } = await supabase
@@ -201,22 +217,7 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
     }
     if (!object) return null
 
-    // Generate signed URLs for media
-    if (object.object_media && object.object_media.length > 0) {
-        for (const media of object.object_media) {
-            if (media.r2_key_medium) {
-                try {
-                    const command = new GetObjectCommand({
-                        Bucket: process.env.R2_BUCKET_NAME,
-                        Key: media.r2_key_medium,
-                    })
-                    media.signed_url = await getSignedUrl(r2, command, { expiresIn: 3600 })
-                } catch (err) {
-                    console.error('Error generating signed URL:', err)
-                }
-            }
-        }
-    }
+    await signMediaUrls(object.object_media)
 
     // Fetch related data in parallel
     const [acquisitionsRes, loansRes, insuranceRes, valuationsRes, documentsRes, expensesRes] = await Promise.all([
@@ -246,7 +247,6 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
         supabase
             .from('object_loans')
             .select(`
-                id,
                 loan_value,
                 condition_out,
                 condition_in,
@@ -261,19 +261,17 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
                     lender:contacts!loans_lender_contact_id_fkey (id, first_name, last_name, display_name)
                 )
             `)
-            .eq('object_id', id)
-            .order('created_at', { ascending: false }),
+            .eq('object_id', id),
 
         // Insurance via junction table
         supabase
             .from('object_insurance')
             .select(`
-                id,
                 insured_value,
                 policy:insurance_policies (
                     id,
                     policy_number,
-                    provider,
+                    policy_subject,
                     coverage_type,
                     start_date,
                     end_date,
@@ -295,7 +293,7 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
                 valuation:valuations (
                     id,
                     valuation_date,
-                    purpose,
+                    value_type,
                     currency,
                     appraiser:contacts!valuations_appraiser_contact_id_fkey (id, first_name, last_name, display_name)
                 )
@@ -310,7 +308,7 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
                 id,
                 document:documents (
                     id,
-                    name,
+                    document_name,
                     document_type,
                     r2_key,
                     file_size,
@@ -344,13 +342,13 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
         valuations: valuationsRes.data || [],
         documents: documentsRes.data || [],
         expenses: expensesRes.data || []
-    }
+    } as ObjectWithRelations
 }
 
 export async function updateObject(id: string, formData: FormData) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Extract core object data
     const title = formData.get('title') as string
@@ -361,7 +359,6 @@ export async function updateObject(id: string, formData: FormData) {
     const year_created = formData.get('year_created') ? parseInt(formData.get('year_created') as string) : null
     const description = formData.get('description') as string
 
-    // New fields
     const inventory_number = formData.get('inventory_number') as string
     const object_type = formData.get('object_type') as string
     const medium = formData.get('medium') as string
@@ -369,7 +366,6 @@ export async function updateObject(id: string, formData: FormData) {
     const signature_info = formData.get('signature_info') as string
     const condition_description = formData.get('condition_description') as string
     const provenance = formData.get('provenance') as string
-    const exhibition_history = formData.get('exhibition_history') as string
     const is_framed = formData.get('is_framed') === 'true'
 
     const { error } = await supabase
@@ -389,19 +385,18 @@ export async function updateObject(id: string, formData: FormData) {
             signature_info: signature_info || null,
             condition_description: condition_description || null,
             provenance: provenance || null,
-            exhibition_history: exhibition_history || null,
             is_framed,
-            updated_at: new Date().toISOString(),
         })
         .eq('id', id)
 
     if (error) throw new Error(`Failed to update object: ${error.message}`)
 
     // Handle new media uploads
-    const newMediaItems = JSON.parse(formData.get('new_media') as string || '[]')
+    const newMediaItems: MediaItemInput[] = JSON.parse(formData.get('new_media') as string || '[]')
     if (newMediaItems.length > 0) {
         const { error: mediaError } = await supabase.from('object_media').insert(
-            newMediaItems.map((m: any) => ({
+            newMediaItems.map((m) => ({
+                workspace_id: workspaceId,
                 object_id: id,
                 type: 'image',
                 r2_key_original: m.keys.original,
@@ -421,9 +416,9 @@ export async function updateObject(id: string, formData: FormData) {
 }
 
 export async function deleteObject(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     // Delete associated media records (cascade should handle this)
     await supabase.from('object_media').delete().eq('object_id', id)
@@ -441,24 +436,29 @@ export async function deleteObject(id: string) {
 }
 
 export async function getCategories() {
-    const supabase = await createClient()
-    const { data } = await supabase.from('categories').select('*').order('name')
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .order('name')
     return data || []
 }
 
 export async function getLocations() {
-    const supabase = await createClient()
-    const { data } = await supabase.from('locations').select('*').order('name')
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .order('name')
     return data || []
 }
 
 export async function createObject(formData: FormData) {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     // Extract core object data
     const title = formData.get('title') as string
@@ -469,27 +469,44 @@ export async function createObject(formData: FormData) {
     const year_created = formData.get('year_created') ? parseInt(formData.get('year_created') as string) : null
     const description = formData.get('description') as string
 
-    // New fields
-    const inventory_number = formData.get('inventory_number') as string
     const object_type = formData.get('object_type') as string
     const medium = formData.get('medium') as string
     const edition = formData.get('edition') as string
     const signature_info = formData.get('signature_info') as string
     const condition_description = formData.get('condition_description') as string
     const provenance = formData.get('provenance') as string
-    const exhibition_history = formData.get('exhibition_history') as string
     const is_framed = formData.get('is_framed') === 'true'
+
+    // Accession auto-numbering: applies when the field is left blank and the
+    // workspace has a prefix configured.
+    let inventory_number = (formData.get('inventory_number') as string) || null
+    if (!inventory_number) {
+        const { data: ws } = await supabase
+            .from('workspaces')
+            .select('accession_prefix')
+            .eq('id', workspaceId)
+            .single()
+        if (ws?.accession_prefix) {
+            const year = new Date().getFullYear()
+            const { count } = await supabase
+                .from('objects')
+                .select('id', { count: 'exact', head: true })
+                .eq('workspace_id', workspaceId)
+                .like('inventory_number', `${ws.accession_prefix}-${year}-%`)
+            inventory_number = `${ws.accession_prefix}-${year}-${String((count ?? 0) + 1).padStart(3, '0')}`
+        }
+    }
 
     // Extract JSON data
     const custom_fields = JSON.parse(formData.get('custom_fields') as string || '{}')
-    const dimensions = JSON.parse(formData.get('dimensions') as string || '[]')
-    const mediaItems = JSON.parse(formData.get('media') as string || '[]')
+    const dimensions: DimensionInput[] = JSON.parse(formData.get('dimensions') as string || '[]')
+    const mediaItems: MediaItemInput[] = JSON.parse(formData.get('media') as string || '[]')
 
     // 1. Create Object
     const { data: object, error: objError } = await supabase
         .from('objects')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             title,
             artist_id: artist_id || null,
             category_id: category_id || null,
@@ -498,14 +515,13 @@ export async function createObject(formData: FormData) {
             year_created,
             description,
             custom_fields,
-            inventory_number: inventory_number || null,
+            inventory_number,
             object_type: object_type || null,
             medium: medium || null,
             edition: edition || null,
             signature_info: signature_info || null,
             condition_description: condition_description || null,
             provenance: provenance || null,
-            exhibition_history: exhibition_history || null,
             is_framed,
         })
         .select()
@@ -516,7 +532,8 @@ export async function createObject(formData: FormData) {
     // 2. Insert Dimensions
     if (dimensions.length > 0) {
         const { error: dimError } = await supabase.from('object_dimensions').insert(
-            dimensions.map((d: any) => ({
+            dimensions.map((d) => ({
+                workspace_id: workspaceId,
                 object_id: object.id,
                 type: d.type,
                 height: d.height,
@@ -531,9 +548,10 @@ export async function createObject(formData: FormData) {
     // 3. Insert Media
     if (mediaItems.length > 0) {
         const { error: mediaError } = await supabase.from('object_media').insert(
-            mediaItems.map((m: any) => ({
+            mediaItems.map((m) => ({
+                workspace_id: workspaceId,
                 object_id: object.id,
-                type: 'image', // Assuming image for now
+                type: 'image',
                 r2_key_original: m.keys.original,
                 r2_key_medium: m.keys.medium,
                 r2_key_thumbnail: m.keys.thumbnail,
@@ -558,7 +576,7 @@ export type ObjectForSelection = {
 }
 
 export async function getObjectsForSelection(): Promise<ObjectForSelection[]> {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data, error } = await supabase
         .from('objects')
         .select(`
@@ -567,6 +585,7 @@ export async function getObjectsForSelection(): Promise<ObjectForSelection[]> {
             inventory_number,
             artists (first_name, last_name)
         `)
+        .eq('workspace_id', workspaceId)
         .order('title')
 
     if (error) {
@@ -579,7 +598,7 @@ export async function getObjectsForSelection(): Promise<ObjectForSelection[]> {
         return {
             id: obj.id,
             title: obj.title,
-            inventory_number: obj.inventory_number,
+            inventory_number: obj.inventory_number ?? undefined,
             artist_name: artist
                 ? `${artist.first_name || ''} ${artist.last_name || ''}`.trim()
                 : undefined

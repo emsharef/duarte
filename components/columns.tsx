@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
+import { OBJECT_STATUS_LABELS } from '@/lib/constants'
 
 export type Artwork = {
     id: string
@@ -19,8 +20,8 @@ export type Artwork = {
     artist_name: string
     year_created: number | null
     status: string
-    location: string | null
-    r2_image_key: string | null
+    location?: string | null
+    r2_image_key?: string | null
     signedUrl?: string | null
 }
 
@@ -67,14 +68,14 @@ export const columns: ColumnDef<Artwork>[] = [
             const status = row.getValue('status') as string
             return (
                 <div
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status === 'Available'
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status === 'in_collection'
                             ? 'bg-green-100 text-green-800'
-                            : status === 'Sold'
+                            : status === 'sold'
                                 ? 'bg-gray-100 text-gray-800'
                                 : 'bg-yellow-100 text-yellow-800'
                         }`}
                 >
-                    {status}
+                    {OBJECT_STATUS_LABELS[status] ?? status}
                 </div>
             )
         },

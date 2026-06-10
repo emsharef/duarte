@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getWorkspaceContext, requireEdit } from '@/lib/workspace'
 import { revalidatePath } from 'next/cache'
 
 export type Expense = {
@@ -20,7 +20,7 @@ export type Expense = {
 }
 
 export async function getExpenses() {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('expenses')
         .select(`
@@ -28,25 +28,27 @@ export async function getExpenses() {
             vendor_contact:contacts!vendor_contact_id(display_name),
             object:objects!object_id(title, inventory_number)
         `)
+        .eq('workspace_id', workspaceId)
         .order('expense_date', { ascending: false })
     return data || []
 }
 
 export async function getExpensesByObject(objectId: string) {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('expenses')
         .select(`
             *,
             vendor_contact:contacts!vendor_contact_id(display_name)
         `)
+        .eq('workspace_id', workspaceId)
         .eq('object_id', objectId)
         .order('expense_date', { ascending: false })
     return data || []
 }
 
 export async function getExpense(id: string) {
-    const supabase = await createClient()
+    const { supabase } = await getWorkspaceContext()
     const { data } = await supabase
         .from('expenses')
         .select(`
@@ -60,14 +62,14 @@ export async function getExpense(id: string) {
 }
 
 export async function createExpense(data: Partial<Expense>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
 
     const { data: expense, error } = await supabase
         .from('expenses')
         .insert({
-            user_id: user.id,
+            workspace_id: workspaceId,
             ...data
         })
         .select()
@@ -82,9 +84,9 @@ export async function createExpense(data: Partial<Expense>) {
 }
 
 export async function updateExpense(id: string, data: Partial<Expense>) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     const { data: expense, error } = await supabase
         .from('expenses')
@@ -99,9 +101,9 @@ export async function updateExpense(id: string, data: Partial<Expense>) {
 }
 
 export async function deleteExpense(id: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
 
     const { error } = await supabase
         .from('expenses')
@@ -113,10 +115,11 @@ export async function deleteExpense(id: string) {
 }
 
 export async function getExpenseTotalByObject(objectId: string) {
-    const supabase = await createClient()
+    const { supabase, workspaceId } = await getWorkspaceContext()
     const { data } = await supabase
         .from('expenses')
         .select('amount, currency')
+        .eq('workspace_id', workspaceId)
         .eq('object_id', objectId)
 
     if (!data) return { total: 0, currency: 'USD' }
