@@ -54,6 +54,23 @@ export async function removeMember(userId: string) {
     revalidatePath('/dashboard/settings')
 }
 
+export async function updateWorkspaceSettings(settings: {
+    accession_prefix: string | null
+    default_currency: string
+}) {
+    const ctx = await getWorkspaceContext()
+    requireOwner(ctx)
+    const { error } = await ctx.supabase
+        .from('workspaces')
+        .update({
+            accession_prefix: settings.accession_prefix || null,
+            default_currency: settings.default_currency,
+        })
+        .eq('id', ctx.workspaceId)
+    if (error) throw new Error(error.message)
+    revalidatePath('/dashboard/settings')
+}
+
 export async function renameWorkspace(name: string) {
     const ctx = await getWorkspaceContext()
     requireOwner(ctx)

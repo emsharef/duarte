@@ -13,24 +13,39 @@ export type ArtObject = {
     artist_id?: string
     category_id?: string
     location_id?: string
+    permanent_location_id?: string
     status?: string
     year_created?: number
+    date_text?: string
     description?: string
     inventory_number?: string
+    previous_id?: string
+    credit_line?: string
+    alternate_title?: string
+    country_of_origin?: string
+    suite_portfolio?: string
+    catalogue_raisonne?: string
     object_type?: string
     medium?: string
     edition?: string
+    edition_number?: string
+    edition_size?: number
+    edition_type?: string
     signature_info?: string
+    inscription?: string
     condition_description?: string
+    condition_summary?: string
+    frame_condition?: string
     provenance?: string
     is_framed?: boolean
     custom_fields?: Record<string, unknown>
     created_at?: string
     updated_at?: string
     // Joined data
-    artists?: { first_name?: string; last_name?: string; company?: string }
-    categories?: { name?: string }
-    locations?: { name?: string }
+    artists?: { id?: string; first_name?: string; last_name?: string; company?: string }
+    categories?: { id?: string; name?: string }
+    locations?: { id?: string; name?: string }
+    permanent_location?: { id?: string; name?: string }
     object_media?: Array<{
         id: string
         r2_key_original?: string
@@ -199,6 +214,10 @@ export type ObjectWithRelations = ArtObject & {
         description?: string
         vendor?: { id: string; first_name?: string; last_name?: string; display_name?: string }
     }>
+    lists?: Array<{
+        sort_order?: number
+        group: { id: string; name: string; description?: string }
+    }>
 }
 
 export async function getObjectWithRelations(id: string): Promise<ObjectWithRelations | null> {
@@ -212,6 +231,7 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
             artists (id, first_name, last_name, company),
             categories (id, name),
             locations:locations!objects_location_id_fkey (id, name, type),
+            permanent_location:locations!objects_permanent_location_id_fkey (id, name, type),
             object_media (*),
             object_dimensions (*)
         `)
@@ -227,7 +247,7 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
     await signMediaUrls(object.object_media)
 
     // Fetch related data in parallel
-    const [acquisitionsRes, loansRes, insuranceRes, valuationsRes, documentsRes, expensesRes] = await Promise.all([
+    const [acquisitionsRes, loansRes, insuranceRes, valuationsRes, documentsRes, expensesRes, listsRes] = await Promise.all([
         // Acquisitions via junction table
         supabase
             .from('object_acquisitions')
@@ -338,7 +358,16 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
                 vendor:contacts!expenses_vendor_contact_id_fkey (id, first_name, last_name, display_name)
             `)
             .eq('object_id', id)
-            .order('expense_date', { ascending: false })
+            .order('expense_date', { ascending: false }),
+
+        // Lists (groups) via junction table
+        supabase
+            .from('object_groups')
+            .select(`
+                sort_order,
+                group:groups (id, name, description)
+            `)
+            .eq('object_id', id)
     ])
 
     return {
@@ -348,8 +377,9 @@ export async function getObjectWithRelations(id: string): Promise<ObjectWithRela
         insurance: insuranceRes.data || [],
         valuations: valuationsRes.data || [],
         documents: documentsRes.data || [],
-        expenses: expensesRes.data || []
-    } as ObjectWithRelations
+        expenses: expensesRes.data || [],
+        lists: listsRes.data || []
+    } as unknown as ObjectWithRelations
 }
 
 export async function updateObject(id: string, formData: FormData) {
@@ -484,6 +514,19 @@ export async function createObject(formData: FormData) {
     const provenance = formData.get('provenance') as string
     const is_framed = formData.get('is_framed') === 'true'
 
+    // New cataloguing fields
+    const permanent_location_id = formData.get('permanent_location_id') as string
+    const date_text = formData.get('date_text') as string
+    const credit_line = formData.get('credit_line') as string
+    const alternate_title = formData.get('alternate_title') as string
+    const country_of_origin = formData.get('country_of_origin') as string
+    const suite_portfolio = formData.get('suite_portfolio') as string
+    const catalogue_raisonne = formData.get('catalogue_raisonne') as string
+    const previous_id = formData.get('previous_id') as string
+    const edition_number = formData.get('edition_number') as string
+    const edition_size = formData.get('edition_size') ? parseInt(formData.get('edition_size') as string) : null
+    const edition_type = formData.get('edition_type') as string
+
     // Accession auto-numbering: applies when the field is left blank and the
     // workspace has a prefix configured.
     let inventory_number = (formData.get('inventory_number') as string) || null
@@ -530,6 +573,17 @@ export async function createObject(formData: FormData) {
             condition_description: condition_description || null,
             provenance: provenance || null,
             is_framed,
+            permanent_location_id: permanent_location_id || null,
+            date_text: date_text || null,
+            credit_line: credit_line || null,
+            alternate_title: alternate_title || null,
+            country_of_origin: country_of_origin || null,
+            suite_portfolio: suite_portfolio || null,
+            catalogue_raisonne: catalogue_raisonne || null,
+            previous_id: previous_id || null,
+            edition_number: edition_number || null,
+            edition_size: Number.isFinite(edition_size) ? edition_size : null,
+            edition_type: edition_type || null,
         })
         .select()
         .single()
@@ -613,4 +667,354 @@ export async function getObjectsForSelection(): Promise<ObjectForSelection[]> {
                 : undefined
         }
     })
+}
+
+// ---------------------------------------------------------------------------
+// Per-field inline editing
+// ---------------------------------------------------------------------------
+
+// Columns the inline editor is allowed to patch.
+const UPDATABLE_OBJECT_COLUMNS = new Set([
+    'title', 'alternate_title', 'inventory_number', 'previous_id', 'credit_line',
+    'artist_id', 'category_id', 'location_id', 'permanent_location_id', 'status',
+    'year_created', 'date_text', 'medium', 'object_type', 'country_of_origin',
+    'edition', 'edition_number', 'edition_size', 'edition_type',
+    'suite_portfolio', 'catalogue_raisonne', 'signature_info', 'inscription',
+    'is_framed', 'frame_condition', 'description', 'provenance',
+    'condition_description', 'condition_summary',
+])
+
+export async function updateObjectFields(id: string, patch: Record<string, unknown>) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const update: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(patch)) {
+        if (!UPDATABLE_OBJECT_COLUMNS.has(key)) continue
+        update[key] = value === '' ? null : value
+    }
+    if (Object.keys(update).length === 0) throw new Error('No editable fields in patch')
+
+    const { error } = await supabase
+        .from('objects')
+        .update(update)
+        .eq('id', id)
+
+    if (error) throw new Error(`Failed to update object: ${error.message}`)
+
+    revalidatePath('/dashboard')
+    revalidatePath(`/dashboard/objects/${id}`)
+}
+
+// ---------------------------------------------------------------------------
+// Dimensions
+// ---------------------------------------------------------------------------
+
+export async function addObjectDimension(objectId: string, dim: DimensionInput) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
+
+    const { error } = await supabase.from('object_dimensions').insert({
+        workspace_id: workspaceId,
+        object_id: objectId,
+        type: dim.type || 'dimensions',
+        height: toNumericOrNull(dim.height),
+        width: toNumericOrNull(dim.width),
+        depth: toNumericOrNull(dim.depth),
+        unit: dim.unit || 'cm',
+    })
+
+    if (error) throw new Error(`Failed to add dimension: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+}
+
+export async function updateObjectDimension(id: string, dim: DimensionInput) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_dimensions')
+        .update({
+            type: dim.type || 'dimensions',
+            height: toNumericOrNull(dim.height),
+            width: toNumericOrNull(dim.width),
+            depth: toNumericOrNull(dim.depth),
+            unit: dim.unit || 'cm',
+        })
+        .eq('id', id)
+
+    if (error) throw new Error(`Failed to update dimension: ${error.message}`)
+    revalidatePath('/dashboard/objects')
+}
+
+export async function deleteObjectDimension(id: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase.from('object_dimensions').delete().eq('id', id)
+    if (error) throw new Error(`Failed to delete dimension: ${error.message}`)
+    revalidatePath('/dashboard/objects')
+}
+
+// ---------------------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------------------
+
+export async function addObjectMedia(objectId: string, items: MediaItemInput[]) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
+    if (items.length === 0) return
+
+    const { error } = await supabase.from('object_media').insert(
+        items.map((m) => ({
+            workspace_id: workspaceId,
+            object_id: objectId,
+            type: 'image',
+            r2_key_original: m.keys.original,
+            r2_key_medium: m.keys.medium,
+            r2_key_thumbnail: m.keys.thumbnail,
+            name: m.name,
+            description: m.description,
+            is_primary: m.is_primary || false,
+        }))
+    )
+
+    if (error) throw new Error(`Failed to add media: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+}
+
+export async function updateObjectMedia(id: string, data: { name?: string; description?: string }) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_media')
+        .update({ name: data.name || null, description: data.description || null })
+        .eq('id', id)
+
+    if (error) throw new Error(`Failed to update media: ${error.message}`)
+    revalidatePath('/dashboard/objects')
+}
+
+export async function setObjectMediaPrimary(objectId: string, mediaId: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error: clearError } = await supabase
+        .from('object_media')
+        .update({ is_primary: false })
+        .eq('object_id', objectId)
+    if (clearError) throw new Error(`Failed to set primary image: ${clearError.message}`)
+
+    const { error } = await supabase
+        .from('object_media')
+        .update({ is_primary: true })
+        .eq('id', mediaId)
+    if (error) throw new Error(`Failed to set primary image: ${error.message}`)
+
+    revalidatePath(`/dashboard/objects/${objectId}`)
+    revalidatePath('/dashboard')
+}
+
+export async function deleteObjectMedia(id: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase.from('object_media').delete().eq('id', id)
+    if (error) throw new Error(`Failed to delete media: ${error.message}`)
+    revalidatePath('/dashboard/objects')
+}
+
+// ---------------------------------------------------------------------------
+// Loan links (no link actions exist in app/actions/loans.ts yet)
+// ---------------------------------------------------------------------------
+
+export async function linkObjectToLoan(objectId: string, loanId: string, loanValue?: number) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
+
+    const { error } = await supabase.from('object_loans').insert({
+        workspace_id: workspaceId,
+        object_id: objectId,
+        loan_id: loanId,
+        loan_value: loanValue ?? null,
+    })
+
+    if (error) throw new Error(`Failed to link loan: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+    revalidatePath('/dashboard/loans')
+}
+
+export async function updateObjectLoan(objectId: string, loanId: string, loanValue?: number) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_loans')
+        .update({ loan_value: loanValue ?? null })
+        .eq('object_id', objectId)
+        .eq('loan_id', loanId)
+
+    if (error) throw new Error(`Failed to update loan link: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+    revalidatePath('/dashboard/loans')
+}
+
+export async function unlinkObjectFromLoan(objectId: string, loanId: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_loans')
+        .delete()
+        .eq('object_id', objectId)
+        .eq('loan_id', loanId)
+
+    if (error) throw new Error(`Failed to unlink loan: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+    revalidatePath('/dashboard/loans')
+}
+
+// Insurance junction edit (link/unlink live in app/actions/insurance.ts)
+export async function updateObjectInsurance(objectId: string, policyId: string, insuredValue?: number) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_insurance')
+        .update({ insured_value: insuredValue ?? null })
+        .eq('object_id', objectId)
+        .eq('policy_id', policyId)
+
+    if (error) throw new Error(`Failed to update insured value: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+    revalidatePath('/dashboard/insurance')
+}
+
+// ---------------------------------------------------------------------------
+// Lists (groups)
+// ---------------------------------------------------------------------------
+
+export async function getListsForSelection() {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('groups')
+        .select('id, name')
+        .eq('workspace_id', workspaceId)
+        .order('name')
+    return data || []
+}
+
+export async function createList(name: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
+
+    const { data, error } = await supabase
+        .from('groups')
+        .insert({ workspace_id: workspaceId, name })
+        .select('id, name')
+        .single()
+
+    if (error) throw new Error(`Failed to create list: ${error.message}`)
+    return data
+}
+
+export async function addObjectToList(objectId: string, groupId: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase, workspaceId } = ctx
+
+    const { error } = await supabase.from('object_groups').insert({
+        workspace_id: workspaceId,
+        object_id: objectId,
+        group_id: groupId,
+    })
+
+    if (error && !error.message.includes('duplicate')) {
+        throw new Error(`Failed to add to list: ${error.message}`)
+    }
+    revalidatePath(`/dashboard/objects/${objectId}`)
+}
+
+export async function removeObjectFromList(objectId: string, groupId: string) {
+    const ctx = await getWorkspaceContext()
+    requireEdit(ctx)
+    const { supabase } = ctx
+
+    const { error } = await supabase
+        .from('object_groups')
+        .delete()
+        .eq('object_id', objectId)
+        .eq('group_id', groupId)
+
+    if (error) throw new Error(`Failed to remove from list: ${error.message}`)
+    revalidatePath(`/dashboard/objects/${objectId}`)
+}
+
+// ---------------------------------------------------------------------------
+// Activity log
+// ---------------------------------------------------------------------------
+
+export type ActivityEntry = {
+    id: string
+    action: string
+    entity_type: string
+    created_at: string
+    user_email?: string | null
+    changes: Record<string, unknown> | null
+}
+
+export async function getObjectActivity(objectId: string): Promise<ActivityEntry[]> {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+
+    const [logRes, emailRes] = await Promise.all([
+        supabase
+            .from('activity_log')
+            .select('id, action, entity_type, user_id, created_at, changes')
+            .eq('workspace_id', workspaceId)
+            .eq('entity_type', 'objects')
+            .eq('entity_id', objectId)
+            .order('created_at', { ascending: false }),
+        supabase.rpc('workspace_member_emails', { ws_id: workspaceId }),
+    ])
+
+    const emailMap = new Map<string, string>(
+        (emailRes.data || []).map((r: { user_id: string; email: string }) => [r.user_id, r.email])
+    )
+
+    return (logRes.data || []).map((row) => ({
+        id: row.id,
+        action: row.action,
+        entity_type: row.entity_type,
+        created_at: row.created_at,
+        user_email: row.user_id ? emailMap.get(row.user_id) ?? null : null,
+        changes: row.changes as Record<string, unknown> | null,
+    }))
+}
+
+// ---------------------------------------------------------------------------
+// Prev/next paging fallback: workspace object ids ordered by created_at desc
+// ---------------------------------------------------------------------------
+
+export async function getObjectNavIds(): Promise<string[]> {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('objects')
+        .select('id')
+        .eq('workspace_id', workspaceId)
+        .order('created_at', { ascending: false })
+    return (data || []).map((r) => r.id)
 }

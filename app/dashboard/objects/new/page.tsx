@@ -28,8 +28,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { createObject, getLocations, getCategories } from '../actions'
+import { createObject } from '../actions'
 import { getArtists, createArtist } from '@/app/actions/artists'
+import { CategoryPicker } from '@/components/category-picker'
+import { LocationPicker } from '@/components/location-picker'
 import { cn } from '@/lib/utils'
 import { OBJECT_STATUSES, OBJECT_STATUS_LABELS } from '@/lib/constants'
 
@@ -52,25 +54,28 @@ type Dimension = {
     unit: string
 }
 
+const EDITION_TYPES = [
+    { value: 'numbered', label: 'Numbered' },
+    { value: 'AP', label: 'Artist’s Proof (AP)' },
+    { value: 'HC', label: 'Hors Commerce (HC)' },
+    { value: 'TP', label: 'Trial Proof (TP)' },
+]
+
 export default function NewObjectPage() {
     const [media, setMedia] = useState<MediaItem[]>([])
     const [dimensions, setDimensions] = useState<Dimension[]>([
         { id: '1', type: 'dimensions', height: '', width: '', depth: '', unit: 'cm' }
     ])
     const [artists, setArtists] = useState<{ id: string; first_name?: string | null; last_name?: string | null; company?: string | null }[]>([])
-    const [locations, setLocations] = useState<{ id: string; name: string; type?: string | null }[]>([])
-    const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
     const [selectedArtist, setSelectedArtist] = useState<string>('')
     const [artistSearch, setArtistSearch] = useState('')
     const [artistOpen, setArtistOpen] = useState(false)
+    const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
+    const [locationId, setLocationId] = useState<string | undefined>(undefined)
+    const [permanentLocationId, setPermanentLocationId] = useState<string | undefined>(undefined)
 
     useEffect(() => {
-        Promise.all([getArtists(), getLocations(), getCategories()])
-            .then(([a, l, c]) => {
-                setArtists(a)
-                setLocations(l)
-                setCategories(c)
-            })
+        getArtists().then(setArtists)
     }, [])
 
     async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -222,26 +227,27 @@ export default function NewObjectPage() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="year">Year</Label>
-                                        <Input id="year" name="year_created" type="number" placeholder="YYYY" />
+                                        <Label htmlFor="category">Category</Label>
+                                        <CategoryPicker
+                                            value={categoryId}
+                                            onChange={setCategoryId}
+                                            name="category_id"
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="category">Category</Label>
-                                        <Select name="category_id">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {categories.map(c => (
-                                                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <Label htmlFor="year">Year</Label>
+                                        <Input id="year" name="year_created" type="number" placeholder="YYYY" />
                                     </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="date_text">Date (display)</Label>
+                                        <Input id="date_text" name="date_text" placeholder="e.g., c. 1950, 1962-64" />
+                                    </div>
+                                </div>
 
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="status">Status</Label>
                                         <Select name="status" defaultValue="in_collection">
@@ -255,23 +261,16 @@ export default function NewObjectPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="object_type">Object Type</Label>
                                         <Input id="object_type" name="object_type" placeholder="e.g., Painting, Sculpture, Print" />
                                     </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="medium">Medium</Label>
-                                        <Input id="medium" name="medium" placeholder="e.g., Oil on canvas, Bronze" />
-                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="edition">Edition</Label>
-                                        <Input id="edition" name="edition" placeholder="e.g., 1/50, AP 2/5" />
+                                        <Label htmlFor="medium">Medium</Label>
+                                        <Input id="medium" name="medium" placeholder="e.g., Oil on canvas, Bronze" />
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="signature_info">Signature</Label>
@@ -282,6 +281,70 @@ export default function NewObjectPage() {
                                 <div className="grid gap-2">
                                     <Label htmlFor="description">Description</Label>
                                     <Textarea id="description" name="description" placeholder="Physical description of the work..." />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Cataloguing</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="alternate_title">Alternate Title</Label>
+                                        <Input id="alternate_title" name="alternate_title" placeholder="Other title the work is known by" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="previous_id">Previous ID</Label>
+                                        <Input id="previous_id" name="previous_id" placeholder="Prior inventory or accession number" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="country_of_origin">Country of Origin</Label>
+                                        <Input id="country_of_origin" name="country_of_origin" placeholder="e.g., France" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="credit_line">Credit Line</Label>
+                                        <Input id="credit_line" name="credit_line" placeholder="e.g., Gift of the artist" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="suite_portfolio">Suite / Portfolio</Label>
+                                        <Input id="suite_portfolio" name="suite_portfolio" placeholder="Series or portfolio name" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="catalogue_raisonne">Catalogue Raisonn&eacute;</Label>
+                                        <Input id="catalogue_raisonne" name="catalogue_raisonne" placeholder="Catalogue raisonn&eacute; reference" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="edition_number">Edition Number</Label>
+                                        <Input id="edition_number" name="edition_number" placeholder="e.g., 12/50, AP 2" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="edition_size">Edition Size</Label>
+                                        <Input id="edition_size" name="edition_size" type="number" placeholder="e.g., 50" />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="edition_type">Edition Type</Label>
+                                        <Select name="edition_type">
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {EDITION_TYPES.map(t => (
+                                                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -420,17 +483,45 @@ export default function NewObjectPage() {
                             <CardHeader>
                                 <CardTitle>Location</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <Select name="location_id">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select location" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {locations.map(l => (
-                                            <SelectItem key={l.id} value={l.id}>{l.name} ({l.type})</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <CardContent className="space-y-4">
+                                <div className="grid gap-2">
+                                    <Label>Current Location</Label>
+                                    <LocationPicker
+                                        value={locationId}
+                                        onChange={setLocationId}
+                                        name="location_id"
+                                        className="w-full"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="justify-start text-xs text-muted-foreground"
+                                        disabled={!permanentLocationId}
+                                        onClick={() => setLocationId(permanentLocationId)}
+                                    >
+                                        Set to permanent location
+                                    </Button>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Permanent Location</Label>
+                                    <LocationPicker
+                                        value={permanentLocationId}
+                                        onChange={setPermanentLocationId}
+                                        name="permanent_location_id"
+                                        className="w-full"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="justify-start text-xs text-muted-foreground"
+                                        disabled={!locationId}
+                                        onClick={() => setPermanentLocationId(locationId)}
+                                    >
+                                        Set to current location
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
 
