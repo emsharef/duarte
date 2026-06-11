@@ -310,6 +310,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "condition_reports_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "condition_reports_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -326,6 +333,7 @@ export type Database = {
           currency: string
           description: string | null
           end_date: string | null
+          exchange_rate: number | null
           id: string
           object_id: string
           start_date: string | null
@@ -340,6 +348,7 @@ export type Database = {
           currency?: string
           description?: string | null
           end_date?: string | null
+          exchange_rate?: number | null
           id?: string
           object_id: string
           start_date?: string | null
@@ -354,6 +363,7 @@ export type Database = {
           currency?: string
           description?: string | null
           end_date?: string | null
+          exchange_rate?: number | null
           id?: string
           object_id?: string
           start_date?: string | null
@@ -374,6 +384,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conservation_treatments_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -583,6 +600,7 @@ export type Database = {
           currency: string
           disposal_date: string | null
           disposal_type: string
+          exchange_rate: number | null
           id: string
           invoice_date: string | null
           invoice_number: string | null
@@ -598,6 +616,7 @@ export type Database = {
           currency?: string
           disposal_date?: string | null
           disposal_type: string
+          exchange_rate?: number | null
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
@@ -613,6 +632,7 @@ export type Database = {
           currency?: string
           disposal_date?: string | null
           disposal_type?: string
+          exchange_rate?: number | null
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
@@ -798,6 +818,7 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          exchange_rate: number | null
           expense_date: string | null
           expense_type: string | null
           id: string
@@ -813,6 +834,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          exchange_rate?: number | null
           expense_date?: string | null
           expense_type?: string | null
           id?: string
@@ -828,6 +850,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          exchange_rate?: number | null
           expense_date?: string | null
           expense_type?: string | null
           id?: string
@@ -850,6 +873,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -914,6 +944,7 @@ export type Database = {
           currency: string
           deductible: number | null
           end_date: string | null
+          exchange_rate: number | null
           id: string
           insurer_contact_id: string | null
           is_active: boolean
@@ -932,6 +963,7 @@ export type Database = {
           currency?: string
           deductible?: number | null
           end_date?: string | null
+          exchange_rate?: number | null
           id?: string
           insurer_contact_id?: string | null
           is_active?: boolean
@@ -950,6 +982,7 @@ export type Database = {
           currency?: string
           deductible?: number | null
           end_date?: string | null
+          exchange_rate?: number | null
           id?: string
           insurer_contact_id?: string | null
           is_active?: boolean
@@ -987,6 +1020,7 @@ export type Database = {
           currency: string
           direction: string | null
           end_date: string | null
+          exchange_rate: number | null
           exhibition_name: string | null
           id: string
           insurance_policy_id: string | null
@@ -1007,6 +1041,7 @@ export type Database = {
           currency?: string
           direction?: string | null
           end_date?: string | null
+          exchange_rate?: number | null
           exhibition_name?: string | null
           id?: string
           insurance_policy_id?: string | null
@@ -1027,6 +1062,7 @@ export type Database = {
           currency?: string
           direction?: string | null
           end_date?: string | null
+          exchange_rate?: number | null
           exhibition_name?: string | null
           id?: string
           insurance_policy_id?: string | null
@@ -1187,6 +1223,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_acquisitions_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_acquisitions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1238,6 +1281,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_components_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_components_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1284,6 +1334,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_consignments_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1338,6 +1395,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_dimensions_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_dimensions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1384,6 +1448,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_disposals_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1436,6 +1507,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_exhibitions_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_exhibitions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1448,16 +1526,19 @@ export type Database = {
         Row: {
           group_id: string
           object_id: string
+          sort_order: number
           workspace_id: string
         }
         Insert: {
           group_id: string
           object_id: string
+          sort_order?: number
           workspace_id: string
         }
         Update: {
           group_id?: string
           object_id?: string
+          sort_order?: number
           workspace_id?: string
         }
         Relationships: [
@@ -1473,6 +1554,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_groups_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1509,6 +1597,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_insurance_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1565,6 +1660,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_loans_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1625,6 +1727,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_media_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_media_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1661,6 +1770,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_publications_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1704,6 +1820,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_shipments_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -1765,6 +1888,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "object_valuations_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "object_valuations_valuation_id_fkey"
             columns: ["valuation_id"]
             isOneToOne: false
@@ -1782,13 +1912,18 @@ export type Database = {
       }
       objects: {
         Row: {
+          alternate_title: string | null
           artist_id: string | null
+          catalogue_raisonne: string | null
           category_id: string | null
           condition_description: string | null
           condition_summary: string | null
+          country_of_origin: string | null
           created_at: string
+          credit_line: string | null
           currency: string
           custom_fields: Json
+          date_text: string | null
           description: string | null
           edition: string | null
           edition_number: string | null
@@ -1805,22 +1940,29 @@ export type Database = {
           medium: string | null
           object_type: string | null
           permanent_location_id: string | null
+          previous_id: string | null
           provenance: string | null
           signature_info: string | null
           status: string
+          suite_portfolio: string | null
           title: string
           updated_at: string
           workspace_id: string
           year_created: number | null
         }
         Insert: {
+          alternate_title?: string | null
           artist_id?: string | null
+          catalogue_raisonne?: string | null
           category_id?: string | null
           condition_description?: string | null
           condition_summary?: string | null
+          country_of_origin?: string | null
           created_at?: string
+          credit_line?: string | null
           currency?: string
           custom_fields?: Json
+          date_text?: string | null
           description?: string | null
           edition?: string | null
           edition_number?: string | null
@@ -1837,22 +1979,29 @@ export type Database = {
           medium?: string | null
           object_type?: string | null
           permanent_location_id?: string | null
+          previous_id?: string | null
           provenance?: string | null
           signature_info?: string | null
           status?: string
+          suite_portfolio?: string | null
           title: string
           updated_at?: string
           workspace_id: string
           year_created?: number | null
         }
         Update: {
+          alternate_title?: string | null
           artist_id?: string | null
+          catalogue_raisonne?: string | null
           category_id?: string | null
           condition_description?: string | null
           condition_summary?: string | null
+          country_of_origin?: string | null
           created_at?: string
+          credit_line?: string | null
           currency?: string
           custom_fields?: Json
+          date_text?: string | null
           description?: string | null
           edition?: string | null
           edition_number?: string | null
@@ -1869,9 +2018,11 @@ export type Database = {
           medium?: string | null
           object_type?: string | null
           permanent_location_id?: string | null
+          previous_id?: string | null
           provenance?: string | null
           signature_info?: string | null
           status?: string
+          suite_portfolio?: string | null
           title?: string
           updated_at?: string
           workspace_id?: string
@@ -1976,6 +2127,13 @@ export type Database = {
             columns: ["object_id"]
             isOneToOne: false
             referencedRelation: "objects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provenance_events_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "objects_grid"
             referencedColumns: ["id"]
           },
           {
@@ -2088,6 +2246,50 @@ export type Database = {
           },
         ]
       }
+      saved_views: {
+        Row: {
+          config: Json
+          created_at: string
+          entity_type: string
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          entity_type: string
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          entity_type?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_views_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           arrival_date: string | null
@@ -2097,6 +2299,7 @@ export type Database = {
           created_at: string
           currency: string
           disposal_id: string | null
+          exchange_rate: number | null
           from_location_id: string | null
           from_text: string | null
           id: string
@@ -2118,6 +2321,7 @@ export type Database = {
           created_at?: string
           currency?: string
           disposal_id?: string | null
+          exchange_rate?: number | null
           from_location_id?: string | null
           from_text?: string | null
           id?: string
@@ -2139,6 +2343,7 @@ export type Database = {
           created_at?: string
           currency?: string
           disposal_id?: string | null
+          exchange_rate?: number | null
           from_location_id?: string | null
           from_text?: string | null
           id?: string
@@ -2209,6 +2414,7 @@ export type Database = {
           appraiser_contact_id: string | null
           created_at: string
           currency: string
+          exchange_rate: number | null
           id: string
           notes: string | null
           total_value: number | null
@@ -2223,6 +2429,7 @@ export type Database = {
           appraiser_contact_id?: string | null
           created_at?: string
           currency?: string
+          exchange_rate?: number | null
           id?: string
           notes?: string | null
           total_value?: number | null
@@ -2237,6 +2444,7 @@ export type Database = {
           appraiser_contact_id?: string | null
           created_at?: string
           currency?: string
+          exchange_rate?: number | null
           id?: string
           notes?: string | null
           total_value?: number | null
@@ -2339,6 +2547,7 @@ export type Database = {
           accession_prefix: string | null
           created_at: string
           created_by: string
+          default_currency: string
           id: string
           name: string
           updated_at: string
@@ -2347,6 +2556,7 @@ export type Database = {
           accession_prefix?: string | null
           created_at?: string
           created_by: string
+          default_currency?: string
           id?: string
           name: string
           updated_at?: string
@@ -2355,6 +2565,7 @@ export type Database = {
           accession_prefix?: string | null
           created_at?: string
           created_by?: string
+          default_currency?: string
           id?: string
           name?: string
           updated_at?: string
@@ -2363,7 +2574,100 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      objects_grid: {
+        Row: {
+          acquisition_currency: string | null
+          acquisition_date: string | null
+          acquisition_exchange_rate: number | null
+          acquisition_price: number | null
+          acquisition_price_domestic: number | null
+          alternate_title: string | null
+          artist_company: string | null
+          artist_first_name: string | null
+          artist_id: string | null
+          artist_last_name: string | null
+          artist_name: string | null
+          catalogue_raisonne: string | null
+          category_id: string | null
+          category_name: string | null
+          condition_description: string | null
+          condition_summary: string | null
+          country_of_origin: string | null
+          created_at: string | null
+          credit_line: string | null
+          currency: string | null
+          current_value: number | null
+          current_value_currency: string | null
+          current_value_domestic: number | null
+          custom_fields: Json | null
+          date_text: string | null
+          description: string | null
+          edition: string | null
+          edition_number: string | null
+          edition_size: number | null
+          edition_type: string | null
+          frame_condition: string | null
+          id: string | null
+          inscription: string | null
+          insured_value_total: number | null
+          inventory_number: string | null
+          is_framed: boolean | null
+          is_insured: boolean | null
+          location_id: string | null
+          location_name: string | null
+          location_status: string | null
+          medium: string | null
+          object_type: string | null
+          permanent_location_id: string | null
+          permanent_location_name: string | null
+          previous_id: string | null
+          provenance: string | null
+          signature_info: string | null
+          status: string | null
+          suite_portfolio: string | null
+          title: string | null
+          updated_at: string | null
+          workspace_id: string | null
+          year_created: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objects_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_permanent_location_id_fkey"
+            columns: ["permanent_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objects_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_workspace_invite: {
@@ -2375,6 +2679,7 @@ export type Database = {
       ensure_personal_workspace: { Args: never; Returns: string }
       is_workspace_member: { Args: { ws_id: string }; Returns: boolean }
       is_workspace_owner: { Args: { ws_id: string }; Returns: boolean }
+      seed_workspace_defaults: { Args: { ws: string }; Returns: undefined }
       workspace_member_emails: {
         Args: { ws_id: string }
         Returns: {
