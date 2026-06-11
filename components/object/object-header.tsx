@@ -63,7 +63,7 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
                 <button
                     type="button"
                     onClick={() => media.length > 0 && setLightboxOpen(true)}
-                    className="relative flex h-64 w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden bg-card ring-1 ring-border md:w-64"
+                    className="relative mx-auto flex h-64 w-full max-w-xs shrink-0 cursor-pointer items-center justify-center overflow-hidden bg-card ring-1 ring-border md:mx-0 md:w-64 md:max-w-none"
                 >
                     {primaryMedia?.signed_url ? (
                         <img
@@ -134,7 +134,7 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
                     </div>
 
                     {/* Caption block — quiet inset */}
-                    <div className="flex items-start justify-between gap-4 border-l-2 border-primary/30 py-1 pl-4">
+                    <div className="flex flex-col items-start gap-3 border-l-2 border-primary/30 py-1 pl-4 sm:flex-row sm:justify-between sm:gap-4">
                         <div className="text-sm leading-relaxed text-foreground/85">
                             {artist && <p>{artist}</p>}
                             <p>

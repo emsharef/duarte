@@ -17,9 +17,11 @@ type Membership = { workspace_id: string; role: string; name: string }
 export function WorkspaceSwitcher({
     memberships,
     activeWorkspaceId,
+    onNavigate,
 }: {
     memberships: Membership[]
     activeWorkspaceId: string
+    onNavigate?: () => void
 }) {
     const [isPending, startTransition] = useTransition()
     const active = memberships.find((m) => m.workspace_id === activeWorkspaceId)
@@ -48,7 +50,10 @@ export function WorkspaceSwitcher({
                 {memberships.map((m) => (
                     <DropdownMenuItem
                         key={m.workspace_id}
-                        onSelect={() => startTransition(() => setActiveWorkspace(m.workspace_id))}
+                        onSelect={() => {
+                            onNavigate?.()
+                            startTransition(() => setActiveWorkspace(m.workspace_id))
+                        }}
                     >
                         <Check
                             className={cn(

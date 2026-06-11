@@ -88,7 +88,7 @@ export function ContactForm({ contact }: ContactFormProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="col-span-2">
                     <Label htmlFor="contact_type">Contact Type</Label>
                     <Select name="contact_type" defaultValue={contact?.contact_type || ''}>

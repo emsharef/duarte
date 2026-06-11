@@ -108,8 +108,8 @@ export function ArtworkTable({
 
     return (
         <div className="space-y-3">
-            <div className="border-y">
-                <Table>
+            <div className="overflow-x-auto border-y">
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>

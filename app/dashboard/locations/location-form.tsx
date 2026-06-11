@@ -86,7 +86,7 @@ export function LocationForm({ location }: LocationFormProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="col-span-2">
                     <Label htmlFor="name">Location Name *</Label>
                     <Input

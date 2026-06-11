@@ -41,15 +41,17 @@ export function Sidebar({
     memberships,
     activeWorkspaceId,
     userEmail,
+    onNavigate,
 }: {
     memberships: Membership[]
     activeWorkspaceId: string
     userEmail: string
+    onNavigate?: () => void
 }) {
     const pathname = usePathname()
 
     return (
-        <div className="flex h-full w-60 flex-col bg-sidebar text-sidebar-foreground">
+        <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
             <div className="flex h-16 items-center px-6">
                 <span className="font-serif text-xl font-semibold tracking-tight text-white">
                     DuArte
@@ -57,12 +59,17 @@ export function Sidebar({
             </div>
 
             <div className="border-b border-sidebar-border px-3 pb-3">
-                <WorkspaceSwitcher memberships={memberships} activeWorkspaceId={activeWorkspaceId} />
+                <WorkspaceSwitcher
+                    memberships={memberships}
+                    activeWorkspaceId={activeWorkspaceId}
+                    onNavigate={onNavigate}
+                />
             </div>
 
             <div className="px-3 pt-4 pb-2">
                 <Link
                     href="/dashboard/objects/new"
+                    onClick={onNavigate}
                     className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
                 >
                     <PlusCircle className="h-4 w-4" />
@@ -77,6 +84,7 @@ export function Sidebar({
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={onNavigate}
                             className={cn(
                                 'group flex items-center rounded-md px-3 py-1.5 text-[13px] transition-colors',
                                 isActive

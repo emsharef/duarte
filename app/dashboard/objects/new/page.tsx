@@ -151,7 +151,7 @@ export default function NewObjectPage() {
                                 <CardTitle>Core Information</CardTitle>
                             </CardHeader>
                             <CardContent className="grid gap-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="title">Title</Label>
                                         <Input id="title" name="title" required placeholder="Untitled" />
@@ -162,7 +162,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label>Artist</Label>
                                         <Popover open={artistOpen} onOpenChange={setArtistOpen}>
@@ -236,7 +236,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="year">Year</Label>
                                         <Input id="year" name="year_created" type="number" placeholder="YYYY" />
@@ -247,7 +247,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="status">Status</Label>
                                         <Select name="status" defaultValue="in_collection">
@@ -267,7 +267,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="medium">Medium</Label>
                                         <Input id="medium" name="medium" placeholder="e.g., Oil on canvas, Bronze" />
@@ -290,7 +290,7 @@ export default function NewObjectPage() {
                                 <CardTitle>Cataloguing</CardTitle>
                             </CardHeader>
                             <CardContent className="grid gap-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="alternate_title">Alternate Title</Label>
                                         <Input id="alternate_title" name="alternate_title" placeholder="Other title the work is known by" />
@@ -301,7 +301,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="country_of_origin">Country of Origin</Label>
                                         <Input id="country_of_origin" name="country_of_origin" placeholder="e.g., France" />
@@ -312,7 +312,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label htmlFor="suite_portfolio">Suite / Portfolio</Label>
                                         <Input id="suite_portfolio" name="suite_portfolio" placeholder="Series or portfolio name" />
@@ -323,7 +323,7 @@ export default function NewObjectPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                     <div className="grid gap-2">
                                         <Label htmlFor="edition_number">Edition Number</Label>
                                         <Input id="edition_number" name="edition_number" placeholder="e.g., 12/50, AP 2" />
@@ -370,8 +370,8 @@ export default function NewObjectPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {dimensions.map((dim, index) => (
-                                    <div key={dim.id} className="flex items-end gap-4 p-4 border rounded-lg bg-gray-50">
-                                        <div className="grid gap-2 flex-1">
+                                    <div key={dim.id} className="flex flex-wrap items-end gap-4 p-4 border rounded-lg bg-gray-50">
+                                        <div className="grid gap-2 flex-1 min-w-32">
                                             <Label>Type</Label>
                                             <Input
                                                 value={dim.type}

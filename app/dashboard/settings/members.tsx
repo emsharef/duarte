@@ -114,7 +114,7 @@ export function MembersPanel({
                 <section className="space-y-4 border-t pt-6">
                     <h2 className="font-serif text-lg font-medium">Invite someone</h2>
                     <form
-                        className="flex gap-2"
+                        className="flex flex-wrap gap-2"
                         onSubmit={(e) => {
                             e.preventDefault()
                             if (!inviteEmail) return

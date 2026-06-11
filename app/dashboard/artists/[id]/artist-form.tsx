@@ -39,7 +39,7 @@ export function ArtistForm({ artist }: { artist: Artist }) {
         <form action={handleSubmit}>
             <Card>
                 <CardContent className="space-y-4 pt-6">
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="grid gap-2">
                             <Label htmlFor="first_name">First Name</Label>
                             <Input id="first_name" name="first_name" defaultValue={artist.first_name ?? undefined} />
@@ -54,7 +54,7 @@ export function ArtistForm({ artist }: { artist: Artist }) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="grid gap-2">
                             <Label htmlFor="nationality">Nationality</Label>
                             <Input id="nationality" name="nationality" defaultValue={artist.nationality ?? undefined} placeholder="e.g. Swiss" />
@@ -65,7 +65,7 @@ export function ArtistForm({ artist }: { artist: Artist }) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="grid gap-2">
                             <Label htmlFor="birth_year">Birth Year</Label>
                             <Input id="birth_year" name="birth_year" type="number" defaultValue={artist.birth_year ?? undefined} />

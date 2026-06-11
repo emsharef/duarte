@@ -108,7 +108,7 @@ export function ObjectDetail({ object, activity, categories, navIds, ctxParam, c
             <Toasts />
 
             {/* Top bar: back, prev/next paging, delete */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                 <Link href="/dashboard">
                     <Button variant="ghost" size="sm">
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -155,7 +155,7 @@ export function ObjectDetail({ object, activity, categories, navIds, ctxParam, c
             <ObjectHeader object={object} activity={activity} canEdit={canEdit} />
 
             <Tabs value={activeTab} onValueChange={handleTabChange} ref={tabsRef}>
-                <TabsList className="h-auto w-full flex-wrap justify-start gap-x-1 rounded-none border-b bg-transparent p-0 text-muted-foreground">
+                <TabsList className="h-auto w-full flex-nowrap justify-start gap-x-1 overflow-x-auto whitespace-nowrap rounded-none border-b bg-transparent p-0 text-muted-foreground md:flex-wrap md:overflow-visible">
                     {tabs.map((tab) => (
                         <TabsTrigger
                             key={tab.key}

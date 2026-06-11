@@ -152,7 +152,7 @@ export function ExpensesTab({ object, canEdit }: { object: ObjectWithRelations; 
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label>Amount</Label>
                                 <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />

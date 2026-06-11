@@ -90,7 +90,11 @@ export function StatusTabs({ data }: { data: FilterData }) {
     ]
 
     return (
-        <div className="flex flex-wrap items-center gap-1" role="tablist" aria-label="Status">
+        <div
+            className="flex items-center gap-1 overflow-x-auto whitespace-nowrap md:flex-wrap"
+            role="tablist"
+            aria-label="Status"
+        >
             {tabs.map((tab) => {
                 const isActive = tab.key ? active === tab.key : !active
                 return (
@@ -106,7 +110,7 @@ export function StatusTabs({ data }: { data: FilterData }) {
                             })
                         }
                         className={cn(
-                            'inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors',
+                            'inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors',
                             isActive
                                 ? 'bg-primary/10 font-medium text-primary'
                                 : 'text-muted-foreground hover:bg-accent hover:text-foreground'

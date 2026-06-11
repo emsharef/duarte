@@ -171,11 +171,11 @@ export function InventoryView({
         <div className="space-y-3">
             {/* Toolbar: one consistent 36px control row */}
             <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                     <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder="Search…"
-                        className="h-9 w-56 border-input bg-background pl-8 shadow-none"
+                        className="h-9 w-full border-input bg-background pl-8 shadow-none sm:w-64"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         onKeyDown={(e) => {
