@@ -23,7 +23,7 @@ function formatCurrency(amount: number | undefined | null, currency = 'USD') {
 
 function formatDate(dateStr: string | undefined | null) {
     if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleDateString()
+    return new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00').toLocaleDateString()
 }
 
 export default async function InsurancePage() {

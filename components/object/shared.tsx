@@ -67,7 +67,8 @@ export function formatCurrency(amount?: number | null, currency: string = 'USD')
 
 export function formatDate(date?: string | null): string {
     if (!date) return '—'
-    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    const normalized = date.includes('T') ? date : date + 'T00:00:00'
+    return new Date(normalized).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 export function formatDateTime(date?: string | null): string {

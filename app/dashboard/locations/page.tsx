@@ -57,7 +57,11 @@ export default async function LocationsPage() {
                     <TableBody>
                         {locations.map((location) => (
                             <TableRow key={location.id}>
-                                <TableCell className="font-medium">{location.name}</TableCell>
+                                <TableCell>
+                                    <Link href={`/dashboard/locations/${location.id}`} className="font-medium hover:underline">
+                                        {location.name}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>
                                     {location.type && (
                                         <Badge variant="outline">{location.type}</Badge>

@@ -44,7 +44,11 @@ export default async function ArtistsPage() {
                     <TableBody>
                         {artists.map((artist) => (
                             <TableRow key={artist.id}>
-                                <TableCell className="font-medium">{artist.last_name || '-'}</TableCell>
+                                <TableCell>
+                                    <Link href={`/dashboard/artists/${artist.id}`} className="font-medium hover:underline">
+                                        {artist.last_name || '-'}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>{artist.first_name || '-'}</TableCell>
                                 <TableCell>{artist.company || '-'}</TableCell>
                                 <TableCell>{artist.nationality || '-'}</TableCell>

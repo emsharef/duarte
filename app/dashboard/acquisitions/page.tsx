@@ -23,7 +23,7 @@ function formatCurrency(amount: number | undefined | null, currency = 'USD') {
 
 function formatDate(dateStr: string | undefined | null) {
     if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleDateString()
+    return new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00').toLocaleDateString()
 }
 
 export default async function AcquisitionsPage() {
@@ -70,7 +70,11 @@ export default async function AcquisitionsPage() {
                     <TableBody>
                         {acquisitions.map((acq) => (
                             <TableRow key={acq.id}>
-                                <TableCell className="font-medium">{acq.acquisition_subject || '-'}</TableCell>
+                                <TableCell>
+                                    <Link href={`/dashboard/acquisitions/${acq.id}`} className="font-medium hover:underline">
+                                        {acq.acquisition_subject || '-'}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>
                                     {acq.acquisition_type && (
                                         <Badge variant="outline">{acq.acquisition_type}</Badge>

@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 
 function formatDate(dateStr?: string | null) {
     if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleDateString()
+    return new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00').toLocaleDateString()
 }
 
 function formatFileSize(bytes?: number | null) {
@@ -75,10 +75,12 @@ export default async function DocumentsPage() {
                     <TableBody>
                         {documents.map((doc) => (
                             <TableRow key={doc.id}>
-                                <TableCell className="font-medium">
+                                <TableCell>
                                     <div className="flex items-center gap-2">
                                         <FileText className="h-4 w-4 text-muted-foreground" />
-                                        {doc.document_name}
+                                        <Link href={`/dashboard/documents/${doc.id}`} className="font-medium hover:underline">
+                                            {doc.document_name}
+                                        </Link>
                                     </div>
                                     {doc.description && (
                                         <p className="text-sm text-muted-foreground truncate max-w-xs">

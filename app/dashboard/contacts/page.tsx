@@ -57,8 +57,10 @@ export default async function ContactsPage() {
                     <TableBody>
                         {contacts.map((contact) => (
                             <TableRow key={contact.id}>
-                                <TableCell className="font-medium">
-                                    {contact.display_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '-'}
+                                <TableCell>
+                                    <Link href={`/dashboard/contacts/${contact.id}`} className="font-medium hover:underline">
+                                        {contact.display_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '-'}
+                                    </Link>
                                 </TableCell>
                                 <TableCell>
                                     {contact.contact_type && (
