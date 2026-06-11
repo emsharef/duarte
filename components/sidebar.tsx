@@ -14,8 +14,10 @@ import {
     DollarSign,
     Receipt,
     ArrowLeftRight,
-    FileText
+    FileText,
+    LogOut
 } from 'lucide-react'
+import { logout } from '@/app/login/actions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { WorkspaceSwitcher } from '@/components/workspace-switcher'
@@ -39,9 +41,11 @@ const navigation = [
 export function Sidebar({
     memberships,
     activeWorkspaceId,
+    userEmail,
 }: {
     memberships: Membership[]
     activeWorkspaceId: string
+    userEmail: string
 }) {
     const pathname = usePathname()
 
@@ -89,6 +93,21 @@ export function Sidebar({
                     )
                 })}
             </nav>
+
+            <div className="border-t px-4 py-3">
+                <form action={logout} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs text-gray-500" title={userEmail}>
+                        {userEmail}
+                    </span>
+                    <button
+                        type="submit"
+                        title="Sign out"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </button>
+                </form>
+            </div>
         </div>
     )
 }

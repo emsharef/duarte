@@ -24,6 +24,13 @@ export async function login(formData: FormData) {
     redirect(next && next.startsWith('/') ? next : '/dashboard')
 }
 
+export async function logout() {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    revalidatePath('/', 'layout')
+    redirect('/login')
+}
+
 export async function loginWithGoogle(formData: FormData) {
     const supabase = await createClient()
     const next = formData.get('next') as string | null

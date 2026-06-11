@@ -10,7 +10,11 @@ export default async function DashboardLayout({
 
     return (
         <div className="flex h-screen overflow-hidden bg-white">
-            <Sidebar memberships={ctx.memberships} activeWorkspaceId={ctx.workspaceId} />
+            <Sidebar
+                memberships={ctx.memberships}
+                activeWorkspaceId={ctx.workspaceId}
+                userEmail={ctx.userEmail ?? ''}
+            />
             <main className="flex-1 overflow-y-auto border-l border-gray-200">
                 <div className="h-full px-8 py-6">{children}</div>
             </main>
