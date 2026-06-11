@@ -51,6 +51,40 @@ Notes for duarte:
 - Distinct note fields per audience (Reference/Research/Staff) rather than one notes blob.
 - duarte deliberately won't use rich-text editors for every field — plain textareas + markdown is a better fit.
 
+## Grid customization & linked columns
+
+The column-settings dialog (gear on any list) is a dual-list picker: "Available columns" → "Columns to display" with reorder arrows, plus items-per-page. The available list is the killer feature — it includes:
+
+- **Linked columns from related tables**: Acquired From Contact Name, Artist First/Last/Nationality/Gender/Locale/Pronoun, etc.
+- **Computed "Current …" rollups**: Current Condition Rating/Reason/Status (from the latest condition report), Current Domestic Value / High / Low / Insured Value (from the latest valuation + insurance link, converted to home currency).
+- **FX metadata**: Acquisition Conversion Rate, Acquisition Date of Conversion Rate, Acquisition Funding, Approval Date…
+
+Duarte equivalent: a per-workspace saved column config per list view (columns + order + page size), with a curated catalog of joinable/computed columns (artist fields, latest-valuation value, latest-condition rating, acquisition price/total in original + home currency). The "Current X" rollups are the high-value part — implement as SQL views or computed selects.
+
+## Currency handling (verified on live data)
+
+- Every money-bearing record stores **original currency amount** (¥92,000, £29,750, €7,500) plus a **conversion rate captured at the transaction date** ("Acquisition Conversion Rate" + "Date of Conversion Rate").
+- A workspace-level **Default Currency** (Account Settings → Customize) defines the "Domestic" currency; every grid can show both the original amount and the Domestic conversion (e.g. ¥92,000 → $613.64), and **column totals sum in domestic currency**.
+- Acquisitions also carry Jurisdiction Country (tax context), Invoice Number, Approval Date, Funding/Funding Source/Restrictions (institutional; duarte can skip funding).
+- Duarte already has `currency`, `base_currency`, `exchange_rate` on acquisitions — Phase 2 should (a) add a workspace `default_currency`, (b) extend the currency+rate pattern to disposals/valuations/expenses/insurance, (c) auto-fill the rate from a historical FX API at entry (CS integrates Open Exchange), (d) always render original + converted.
+
+## Batch operations (selection toolbar)
+
+Selecting rows (per-row checkbox; select-all dropdown offers All / Page / None; selected rows highlight with an "N items selected" banner) reveals a delete icon, report icon, and a **More ▾** menu:
+
+- **Labels** — print labels for the selection
+- **Export With Image / Export Without Image**
+- **Batch Update Location/Inventory** — bulk move + log an inventory check
+- **Batch Update** — generic field-level bulk edit
+- **Permissions** — per-object access control (duarte: out of scope; roles are workspace-level)
+- **Add To Acquisition / Consignment / Exhibition / Group / Insurance / Loan / Publication** — attach the selection to any event record. This one menu IS the bulk-ops spec: "assign to group" generalizes to every junction table.
+
+## Locations & settings details
+
+- Locations page = expandable tree with per-node aggregate Object Count, inline Add Sub-Location / Edit / Delete per row, and a Labels button. Sort order via numeric name prefixes ("01. Living Room"). Pragmatic virtual locations in real use: "On Loan", "Storage", "Other", other residences.
+- Account Settings → Customize: Web logo (white-label gallery), **Default Currency**, language, **Imperial/Metric preference**, geo-coordinate format; then the custom-fields builder — typed **User Defined fields** (Text, Rich Text, Date, **Currency**, Number, **Controlled Vocab**) scoped per entity (object + Acquisition/Expense/Sale/Conservation/Condition/Contact/Artist/Author). Validates duarte's `custom_field_definitions(entity_type, field_type)` design; add `currency` and `controlled_vocab` to our field_type enum.
+- Multi-tenancy: "Subscriptions" list (account can hold several collections) with per-subscription storage size; Account Access tab for sharing.
+
 ## Priority takeaways for Phase 2
 
 1. Object detail = header summary card + counted tab strip; record prev/next paging.
