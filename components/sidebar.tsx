@@ -54,7 +54,7 @@ export function Sidebar({
         <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
             <div className="flex h-16 items-center px-6">
                 <span className="font-serif text-xl font-semibold tracking-tight text-white">
-                    DuArte
+                    DūArte
                 </span>
             </div>
 

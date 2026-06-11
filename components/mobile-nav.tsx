@@ -44,7 +44,7 @@ export function MobileNav({
                 </SheetContent>
             </Sheet>
             <span className="font-serif text-lg font-semibold tracking-tight text-white">
-                DuArte
+                DūArte
             </span>
         </header>
     )
