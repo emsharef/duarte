@@ -80,10 +80,13 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
     const customFields = Object.entries(object.custom_fields ?? {})
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-10">
+            {canEdit && (
+                <p className="-mt-4 text-xs text-muted-foreground/70">Click any field to edit.</p>
+            )}
             {groups.map((group) => (
                 <section key={group.title}>
-                    <h3 className="font-semibold mb-3">{group.title}</h3>
+                    <h3 className="mb-4 border-b pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{group.title}</h3>
                     <div className={group.title === 'Texts'
                         ? 'space-y-4'
                         : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4'}>
@@ -104,7 +107,7 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
             ))}
 
             <section>
-                <h3 className="font-semibold mb-3">Custom fields</h3>
+                <h3 className="mb-4 border-b pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Custom fields</h3>
                 {customFields.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
                         {customFields.map(([key, value]) => (

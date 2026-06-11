@@ -106,7 +106,7 @@ export function ArtworkTable({
 
     return (
         <div className="space-y-3">
-            <div className="rounded-md border">
+            <div className="border-y">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -130,7 +130,7 @@ export function ArtworkTable({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && 'selected'}
-                                    className="cursor-pointer hover:bg-gray-50"
+                                    className="cursor-pointer"
                                     onClick={(e) => {
                                         // Don't navigate if clicking on a link, button or checkbox
                                         const target = e.target as HTMLElement
@@ -147,8 +147,8 @@ export function ArtworkTable({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                                    No objects match the current filters.
                                 </TableCell>
                             </TableRow>
                         )}

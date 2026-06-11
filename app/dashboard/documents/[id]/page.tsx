@@ -17,7 +17,7 @@ export default async function EditDocumentPage({
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Edit Document</h1>
+                <h1 className="font-serif text-2xl font-semibold tracking-tight">Edit Document</h1>
                 <p className="text-muted-foreground">Update document information.</p>
             </div>
             <DocumentForm document={document} />

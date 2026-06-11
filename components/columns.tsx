@@ -89,11 +89,11 @@ function sortableHeader(def: ListColumnDef): ColumnDef<GridRow>['header'] {
             <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 h-8 px-2"
+                className="-ml-2 h-8 px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             >
                 {def.label}
-                <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 opacity-50" />
+                <ArrowUpDown className="ml-1 h-3 w-3 opacity-40" />
             </Button>
         )
         return def.type === 'money' ? <div className="-mr-2 text-right">{button}</div> : button
@@ -113,13 +113,13 @@ function toColumnDef(def: ListColumnDef, defaultCurrency: string): ColumnDef<Gri
         case 'image':
             base.cell = ({ row }) => {
                 const url = row.original.signed_url
-                if (!url) return <div className="h-10 w-10 rounded-md bg-gray-100" />
+                if (!url) return <div className="h-10 w-10 rounded-sm bg-muted ring-1 ring-border" />
                 return (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={url}
                         alt={row.original.title ?? ''}
-                        className="relative z-10 h-10 w-10 origin-left rounded-md object-cover transition-transform hover:scale-150"
+                        className="relative z-10 h-10 w-10 origin-left rounded-sm object-cover ring-1 ring-black/10 transition-transform hover:scale-150"
                     />
                 )
             }

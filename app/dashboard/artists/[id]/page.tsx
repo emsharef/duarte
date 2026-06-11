@@ -14,7 +14,7 @@ export default async function EditArtistPage({ params }: { params: Promise<{ id:
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Edit Artist</h1>
+                <h1 className="font-serif text-2xl font-semibold tracking-tight">Edit Artist</h1>
                 <p className="text-muted-foreground">Update profile for {artist.first_name} {artist.last_name} {artist.company}.</p>
             </div>
             <ArtistForm artist={artist} />

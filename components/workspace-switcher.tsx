@@ -26,7 +26,7 @@ export function WorkspaceSwitcher({
 
     if (memberships.length <= 1) {
         return (
-            <div className="px-3 py-2 text-sm font-medium text-gray-700 truncate">
+            <div className="truncate px-3 py-2 font-serif text-sm font-medium text-sidebar-foreground/90">
                 {active?.name ?? 'Workspace'}
             </div>
         )
@@ -35,9 +35,13 @@ export function WorkspaceSwitcher({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between" disabled={isPending}>
+                <Button
+                    variant="ghost"
+                    className="w-full justify-between bg-sidebar-accent/40 font-serif text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    disabled={isPending}
+                >
                     <span className="truncate">{active?.name ?? 'Workspace'}</span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-gray-400" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-sidebar-foreground/40" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">

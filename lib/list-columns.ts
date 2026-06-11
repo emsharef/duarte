@@ -29,26 +29,27 @@ export const LIST_STATUS_LABELS: Record<string, string> = {
     ...OBJECT_STATUS_LABELS,
 }
 
+// Muted tonal chip colors (exhibition-catalogue palette — no candy colors)
 export function statusChipClass(status: string): string {
     switch (status) {
         case 'in_collection':
-            return 'bg-green-100 text-green-800'
+            return 'bg-emerald-700/10 text-emerald-900'
         case 'on_loan':
         case 'on_consignment':
-            return 'bg-blue-100 text-blue-800'
+            return 'bg-sky-700/10 text-sky-900'
         case 'incoming':
-            return 'bg-amber-100 text-amber-800'
+            return 'bg-amber-600/10 text-amber-900'
         case 'lost':
         case 'destroyed':
-            return 'bg-red-100 text-red-800'
+            return 'bg-red-700/10 text-red-900'
         case 'sold':
         case 'traded':
         case 'gifted':
         case 'donated':
         case 'deaccessioned':
-            return 'bg-gray-100 text-gray-800'
+            return 'bg-stone-500/10 text-stone-600'
         default:
-            return 'bg-yellow-100 text-yellow-800'
+            return 'bg-stone-500/10 text-stone-600'
     }
 }
 

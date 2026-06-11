@@ -17,8 +17,8 @@ export function GalleryGrid({ rows, canEdit }: { rows: GridRow[]; canEdit: boole
 
     if (rows.length === 0) {
         return (
-            <div className="flex h-40 items-center justify-center rounded-md border text-sm text-muted-foreground">
-                No results.
+            <div className="flex h-40 items-center justify-center border border-dashed border-border text-sm text-muted-foreground/80">
+                No objects match the current filters.
             </div>
         )
     }
@@ -28,7 +28,7 @@ export function GalleryGrid({ rows, canEdit }: { rows: GridRow[]; canEdit: boole
             {rows.map((row) => {
                 if (!row.id) return null
                 return (
-                    <div key={row.id} className="group relative overflow-hidden rounded-lg border bg-card">
+                    <div key={row.id} className="group relative overflow-hidden bg-card ring-1 ring-border">
                         <input
                             type="checkbox"
                             className="absolute left-2 top-2 z-10 h-4 w-4 cursor-pointer accent-primary"
@@ -45,7 +45,7 @@ export function GalleryGrid({ rows, canEdit }: { rows: GridRow[]; canEdit: boole
                                     className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
                                 />
                             ) : (
-                                <div className="flex aspect-square w-full items-center justify-center bg-gray-100 text-xs text-muted-foreground">
+                                <div className="flex aspect-square w-full items-center justify-center bg-muted text-xs text-muted-foreground">
                                     No image
                                 </div>
                             )}

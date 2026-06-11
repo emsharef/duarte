@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,34 @@ type TabConfig = {
 
 export function ObjectDetail({ object, activity, categories, navIds, ctxParam, canEdit }: ObjectDetailProps) {
     const [deleting, setDeleting] = useState(false)
+    const [activeTab, setActiveTab] = useState('info')
+    const tabsRef = useRef<HTMLDivElement | null>(null)
+    const savedScrollRef = useRef<number | null>(null)
+
+    // The dashboard scrolls inside <main>, not the window. Radix remounts tab
+    // panels on switch, which can clamp/reset that container's scrollTop —
+    // capture it before the switch and restore it after paint.
+    function scrollContainer(): HTMLElement | null {
+        let el: HTMLElement | null = tabsRef.current?.parentElement ?? null
+        while (el) {
+            const overflowY = window.getComputedStyle(el).overflowY
+            if (overflowY === 'auto' || overflowY === 'scroll') return el
+            el = el.parentElement
+        }
+        return null
+    }
+
+    function handleTabChange(value: string) {
+        savedScrollRef.current = scrollContainer()?.scrollTop ?? null
+        setActiveTab(value)
+    }
+
+    useLayoutEffect(() => {
+        if (savedScrollRef.current == null) return
+        const container = scrollContainer()
+        if (container) container.scrollTop = savedScrollRef.current
+        savedScrollRef.current = null
+    }, [activeTab])
 
     // Prev/next paging through the object set the user came from (?ctx=),
     // falling back to workspace-wide created_at order.
@@ -126,16 +154,25 @@ export function ObjectDetail({ object, activity, categories, navIds, ctxParam, c
 
             <ObjectHeader object={object} activity={activity} canEdit={canEdit} />
 
-            <Tabs defaultValue="info">
-                <TabsList className="h-auto flex-wrap justify-start">
+            <Tabs value={activeTab} onValueChange={handleTabChange} ref={tabsRef}>
+                <TabsList className="h-auto w-full flex-wrap justify-start gap-x-1 rounded-none border-b bg-transparent p-0 text-muted-foreground">
                     {tabs.map((tab) => (
-                        <TabsTrigger key={tab.key} value={tab.key}>
-                            {tab.label}{tab.count != null ? ` (${tab.count})` : ''}
+                        <TabsTrigger
+                            key={tab.key}
+                            value={tab.key}
+                            className="-mb-px rounded-none border-b-2 border-transparent px-3 py-2 text-[13px] font-normal data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                        >
+                            {tab.label}
+                            {tab.count != null && tab.count > 0 && (
+                                <span className="ml-1.5 text-xs tabular-nums text-muted-foreground/70">{tab.count}</span>
+                            )}
                         </TabsTrigger>
                     ))}
                 </TabsList>
+                {/* min-height keeps the page from collapsing (and the scroll position
+                    from jumping) when switching to a tab with shorter content */}
                 {tabs.map((tab) => (
-                    <TabsContent key={tab.key} value={tab.key} className="mt-6">
+                    <TabsContent key={tab.key} value={tab.key} className="mt-8 min-h-[60vh]">
                         {tab.content}
                     </TabsContent>
                 ))}

@@ -9,14 +9,14 @@ export default async function DashboardLayout({
     const ctx = await getWorkspaceContext()
 
     return (
-        <div className="flex h-screen overflow-hidden bg-white">
+        <div className="flex h-screen overflow-hidden bg-background">
             <Sidebar
                 memberships={ctx.memberships}
                 activeWorkspaceId={ctx.workspaceId}
                 userEmail={ctx.userEmail ?? ''}
             />
-            <main className="flex-1 overflow-y-auto border-l border-gray-200">
-                <div className="h-full px-8 py-6">{children}</div>
+            <main className="flex-1 overflow-y-auto">
+                <div className="h-full px-10 py-8">{children}</div>
             </main>
         </div>
     )

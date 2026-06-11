@@ -19,13 +19,31 @@ type StatusChipProps = {
     canEdit: boolean
 }
 
+// Solid dot colors for the dropdown (chip backgrounds are translucent)
+function dotClass(status: string): string {
+    switch (status) {
+        case 'in_collection':
+            return 'bg-emerald-700'
+        case 'on_loan':
+        case 'on_consignment':
+            return 'bg-sky-700'
+        case 'incoming':
+            return 'bg-amber-600'
+        case 'lost':
+        case 'destroyed':
+            return 'bg-red-700'
+        default:
+            return 'bg-stone-400'
+    }
+}
+
 export function StatusChip({ objectId, status, canEdit }: StatusChipProps) {
     const router = useRouter()
     const [pending, startTransition] = useTransition()
 
     const label = LIST_STATUS_LABELS[status] ?? status
     const chipClass = cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide whitespace-nowrap',
         statusChipClass(status)
     )
 
@@ -65,7 +83,7 @@ export function StatusChip({ objectId, status, canEdit }: StatusChipProps) {
                         <span
                             className={cn(
                                 'mr-2 inline-block h-2 w-2 rounded-full',
-                                statusChipClass(s).split(' ')[0]
+                                dotClass(s)
                             )}
                         />
                         {LIST_STATUS_LABELS[s] ?? s}

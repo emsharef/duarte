@@ -18,7 +18,7 @@ export default async function ArtistsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Artists</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Artists</h1>
                     <p className="text-muted-foreground">Manage artist profiles and details.</p>
                 </div>
                 {/* We can add a "Create Artist" button here later if needed, 

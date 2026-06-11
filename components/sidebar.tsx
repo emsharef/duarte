@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { WorkspaceSwitcher } from '@/components/workspace-switcher'
 
 type Membership = { workspace_id: string; role: string; name: string }
@@ -50,25 +49,28 @@ export function Sidebar({
     const pathname = usePathname()
 
     return (
-        <div className="flex h-full w-64 flex-col border-r bg-white">
-            <div className="flex h-16 items-center border-b px-6">
-                <span className="text-lg font-bold tracking-tight">DūArte</span>
+        <div className="flex h-full w-60 flex-col bg-sidebar text-sidebar-foreground">
+            <div className="flex h-16 items-center px-6">
+                <span className="font-serif text-xl font-semibold tracking-tight text-white">
+                    DūArte
+                </span>
             </div>
 
-            <div className="border-b px-3 py-3">
+            <div className="border-b border-sidebar-border px-3 pb-3">
                 <WorkspaceSwitcher memberships={memberships} activeWorkspaceId={activeWorkspaceId} />
             </div>
 
-            <div className="p-4">
-                <Link href="/dashboard/objects/new">
-                    <Button className="w-full justify-start" variant="default">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Object
-                    </Button>
+            <div className="px-3 pt-4 pb-2">
+                <Link
+                    href="/dashboard/objects/new"
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
+                >
+                    <PlusCircle className="h-4 w-4" />
+                    Add Object
                 </Link>
             </div>
 
-            <nav className="flex-1 space-y-1 px-3 py-2">
+            <nav className="flex-1 space-y-px overflow-y-auto px-3 py-2">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href
                     return (
@@ -76,33 +78,36 @@ export function Sidebar({
                             key={item.name}
                             href={item.href}
                             className={cn(
-                                'group flex items-center rounded-md px-3 py-2 text-sm font-medium',
+                                'group flex items-center rounded-md px-3 py-1.5 text-[13px] transition-colors',
                                 isActive
-                                    ? 'bg-gray-100 text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-sidebar-accent font-medium text-white'
+                                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                             )}
                         >
                             <item.icon
                                 className={cn(
-                                    'mr-3 h-5 w-5 flex-shrink-0',
-                                    isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
+                                    'mr-3 h-4 w-4 flex-shrink-0',
+                                    isActive
+                                        ? 'text-primary-foreground/90'
+                                        : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
                                 )}
                             />
-                            {item.name}
+                            <span className="flex-1">{item.name}</span>
+                            {isActive && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[oklch(0.62_0.11_25)]" />}
                         </Link>
                     )
                 })}
             </nav>
 
-            <div className="border-t px-4 py-3">
+            <div className="border-t border-sidebar-border px-4 py-3">
                 <form action={logout} className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs text-gray-500" title={userEmail}>
+                    <span className="truncate text-xs text-sidebar-foreground/50" title={userEmail}>
                         {userEmail}
                     </span>
                     <button
                         type="submit"
                         title="Sign out"
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/40 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                     >
                         <LogOut className="h-4 w-4" />
                     </button>

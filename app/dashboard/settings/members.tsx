@@ -61,18 +61,18 @@ export function MembersPanel({
     return (
         <div className="space-y-8">
             {error && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+                <p className="bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
             )}
 
-            <section className="space-y-3">
-                <h2 className="text-lg font-semibold">Members</h2>
-                <div className="divide-y rounded-md border">
+            <section className="space-y-4 border-t pt-6">
+                <h2 className="font-serif text-lg font-medium">Members</h2>
+                <div className="divide-y border-y">
                     {members.map((m) => (
                         <div key={m.user_id} className="flex items-center gap-3 px-4 py-3">
                             <div className="flex-1 truncate text-sm">
                                 {m.email}
                                 {m.user_id === currentUserId && (
-                                    <span className="ml-2 text-xs text-gray-400">(you)</span>
+                                    <span className="ml-2 text-xs text-muted-foreground/70">(you)</span>
                                 )}
                             </div>
                             {isOwner && m.user_id !== currentUserId ? (
@@ -99,11 +99,11 @@ export function MembersPanel({
                                         disabled={isPending}
                                         onClick={() => run(() => removeMember(m.user_id))}
                                     >
-                                        <Trash2 className="h-4 w-4 text-gray-400" />
+                                        <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </>
                             ) : (
-                                <span className="text-sm text-gray-500">{m.role}</span>
+                                <span className="text-sm text-muted-foreground">{m.role}</span>
                             )}
                         </div>
                     ))}
@@ -111,8 +111,8 @@ export function MembersPanel({
             </section>
 
             {isOwner && (
-                <section className="space-y-3">
-                    <h2 className="text-lg font-semibold">Invite someone</h2>
+                <section className="space-y-4 border-t pt-6">
+                    <h2 className="font-serif text-lg font-medium">Invite someone</h2>
                     <form
                         className="flex gap-2"
                         onSubmit={(e) => {
@@ -147,25 +147,25 @@ export function MembersPanel({
                         </Button>
                     </form>
                     {createdLink && (
-                        <p className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                        <p className="border-l-2 border-primary/30 bg-muted/40 px-3 py-2 text-sm text-foreground/85">
                             Share this link: <code className="break-all">{createdLink}</code>{' '}
                             (no email is sent — the invitee must log in with the invited address)
                         </p>
                     )}
 
                     {invites.length > 0 && (
-                        <div className="divide-y rounded-md border">
+                        <div className="divide-y border-y">
                             {invites.map((inv) => (
                                 <div key={inv.id} className="flex items-center gap-3 px-4 py-3">
                                     <div className="flex-1 truncate text-sm">
                                         {inv.email}
-                                        <span className="ml-2 text-xs text-gray-400">{inv.role} · pending</span>
+                                        <span className="ml-2 text-xs text-muted-foreground/70">{inv.role} · pending</span>
                                     </div>
                                     <Button variant="ghost" size="icon" onClick={() => copy(inv.token)}>
                                         {copiedToken === inv.token ? (
                                             <Check className="h-4 w-4 text-green-500" />
                                         ) : (
-                                            <Copy className="h-4 w-4 text-gray-400" />
+                                            <Copy className="h-4 w-4 text-muted-foreground" />
                                         )}
                                     </Button>
                                     <Button
@@ -174,7 +174,7 @@ export function MembersPanel({
                                         disabled={isPending}
                                         onClick={() => run(() => revokeInvite(inv.id))}
                                     >
-                                        <Trash2 className="h-4 w-4 text-gray-400" />
+                                        <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </div>
                             ))}

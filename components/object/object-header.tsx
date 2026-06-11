@@ -18,8 +18,8 @@ type ObjectHeaderProps = {
 function HeaderField({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <div className="text-sm font-medium truncate">{children}</div>
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground/80">{label}</p>
+            <div className="truncate text-sm font-medium">{children}</div>
         </div>
     )
 }
@@ -57,13 +57,13 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
     }
 
     return (
-        <div className="rounded-xl border bg-card p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-                {/* Hero image */}
+        <div className="border-y py-8">
+            <div className="flex flex-col md:flex-row gap-8">
+                {/* Hero image — catalogue plate */}
                 <button
                     type="button"
                     onClick={() => media.length > 0 && setLightboxOpen(true)}
-                    className="relative w-full md:w-56 h-56 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center cursor-pointer"
+                    className="relative flex h-64 w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden bg-card ring-1 ring-border md:w-64"
                 >
                     {primaryMedia?.signed_url ? (
                         <img
@@ -83,11 +83,11 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
                 <Lightbox media={media} open={lightboxOpen} onOpenChange={setLightboxOpen} />
 
                 {/* Title, key fields, caption */}
-                <div className="flex-1 min-w-0 space-y-4">
+                <div className="flex-1 min-w-0 space-y-6">
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">{object.title}</h1>
-                            <p className="text-muted-foreground">
+                            <h1 className="font-serif text-3xl font-medium italic leading-snug tracking-tight">{object.title}</h1>
+                            <p className="mt-1 text-muted-foreground">
                                 {artist && (
                                     object.artists?.id ? (
                                         <Link href={`/dashboard/artists/${object.artists.id}`} className="hover:underline">
@@ -133,9 +133,9 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
                         </HeaderField>
                     </div>
 
-                    {/* Caption block */}
-                    <div className="flex items-start justify-between gap-4 rounded-lg bg-muted/50 p-3">
-                        <div className="text-sm leading-snug">
+                    {/* Caption block — quiet inset */}
+                    <div className="flex items-start justify-between gap-4 border-l-2 border-primary/30 py-1 pl-4">
+                        <div className="text-sm leading-relaxed text-foreground/85">
                             {artist && <p>{artist}</p>}
                             <p>
                                 <span className="italic">{object.title}</span>

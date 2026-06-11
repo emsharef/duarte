@@ -46,12 +46,12 @@ export function WorkspaceSettings({
     }
 
     return (
-        <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Workspace</h2>
+        <section className="space-y-4">
+            <h2 className="font-serif text-lg font-medium">Workspace</h2>
             {error && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+                <p className="bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
             )}
-            <div className="space-y-4 rounded-md border p-4">
+            <div className="space-y-4">
                 <div className="grid gap-2">
                     <Label htmlFor="accession_prefix">Accession Prefix</Label>
                     <Input
@@ -61,7 +61,7 @@ export function WorkspaceSettings({
                         placeholder="e.g., COLL"
                         className="max-w-xs"
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                         When set, new objects without an inventory number are auto-numbered
                         (e.g., {prefix.trim() || 'COLL'}-{new Date().getFullYear()}-001). Leave blank to disable.
                     </p>

@@ -139,17 +139,19 @@ export function buildCaption(object: ObjectWithRelations): string {
 
 export function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
     return (
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">{title}</h3>
+        <div className="flex items-center justify-between mb-4 border-b pb-1.5">
+            <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</h3>
             {action}
         </div>
     )
 }
 
-export function EmptyState({ text }: { text: string }) {
+// Single empty-state pattern: quiet, centered, with at most one action.
+export function EmptyState({ text, action }: { text: string; action?: React.ReactNode }) {
     return (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground">{text}</p>
+        <div className="flex flex-col items-center gap-3 border border-dashed border-border px-8 py-12 text-center">
+            <p className="text-sm text-muted-foreground/80">{text}</p>
+            {action}
         </div>
     )
 }

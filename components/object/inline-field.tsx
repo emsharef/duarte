@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { Pencil } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -137,6 +138,8 @@ export function InlineField({
         }
     }
 
+    const isEmpty = current == null || current === ''
+
     return (
         <div className="min-w-0">
             <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
@@ -144,13 +147,18 @@ export function InlineField({
                 <p
                     onClick={startEdit}
                     className={cn(
-                        'text-sm min-h-6 whitespace-pre-wrap break-words rounded px-1 -mx-1 py-0.5',
-                        canEdit && 'cursor-pointer hover:bg-muted/70',
-                        (current == null || current === '') && 'text-muted-foreground'
+                        'group text-sm min-h-6 whitespace-pre-wrap break-words rounded px-1 -mx-1 py-0.5 transition-colors',
+                        canEdit && 'hover:bg-accent/70',
+                        canEdit && (isSelect ? 'cursor-pointer' : 'cursor-text'),
+                        isEmpty && 'text-muted-foreground/70',
+                        isEmpty && canEdit && 'underline decoration-dotted decoration-muted-foreground/40 underline-offset-4'
                     )}
                     title={canEdit ? 'Click to edit' : undefined}
                 >
                     {displayText()}
+                    {canEdit && (
+                        <Pencil className="ml-1.5 inline-block h-3 w-3 align-[-1px] text-muted-foreground/60 opacity-0 transition-opacity group-hover:opacity-100" />
+                    )}
                 </p>
             )}
         </div>

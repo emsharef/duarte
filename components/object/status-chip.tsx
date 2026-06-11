@@ -12,24 +12,25 @@ import { OBJECT_STATUSES, OBJECT_STATUS_LABELS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { toastError } from './shared'
 
+// Muted tonal chip colors (exhibition-catalogue palette — no candy colors)
 const STATUS_COLORS: Record<string, string> = {
-    in_collection: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    incoming: 'bg-sky-100 text-sky-800 border-sky-200',
-    on_loan: 'bg-amber-100 text-amber-800 border-amber-200',
-    on_consignment: 'bg-violet-100 text-violet-800 border-violet-200',
-    sold: 'bg-slate-100 text-slate-700 border-slate-200',
-    traded: 'bg-slate-100 text-slate-700 border-slate-200',
-    gifted: 'bg-slate-100 text-slate-700 border-slate-200',
-    donated: 'bg-slate-100 text-slate-700 border-slate-200',
-    lost: 'bg-red-100 text-red-800 border-red-200',
-    destroyed: 'bg-red-100 text-red-800 border-red-200',
-    deaccessioned: 'bg-stone-100 text-stone-700 border-stone-200',
+    in_collection: 'bg-emerald-700/10 text-emerald-900',
+    incoming: 'bg-amber-600/10 text-amber-900',
+    on_loan: 'bg-sky-700/10 text-sky-900',
+    on_consignment: 'bg-sky-700/10 text-sky-900',
+    sold: 'bg-stone-500/10 text-stone-600',
+    traded: 'bg-stone-500/10 text-stone-600',
+    gifted: 'bg-stone-500/10 text-stone-600',
+    donated: 'bg-stone-500/10 text-stone-600',
+    lost: 'bg-red-700/10 text-red-900',
+    destroyed: 'bg-red-700/10 text-red-900',
+    deaccessioned: 'bg-stone-500/10 text-stone-600',
 }
 
 function chipClass(status: string) {
     return cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700 border-gray-200'
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+        STATUS_COLORS[status] ?? 'bg-stone-500/10 text-stone-600'
     )
 }
 

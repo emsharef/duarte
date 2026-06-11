@@ -25,22 +25,22 @@ export function SummaryCard({
     className
 }: SummaryCardProps) {
     const statusColors = {
-        active: 'border-l-green-500',
-        expired: 'border-l-red-500',
-        pending: 'border-l-yellow-500',
-        default: 'border-l-gray-300'
+        active: 'border-l-emerald-700/60',
+        expired: 'border-l-red-700/60',
+        pending: 'border-l-amber-600/60',
+        default: 'border-l-border'
     }
 
     const content = (
         <Card className={cn(
-            "border-l-4 transition-shadow hover:shadow-md",
+            "border-l-2 shadow-none transition-colors hover:bg-accent/40",
             statusColors[status],
             href && "cursor-pointer",
             className
         )}>
             <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 p-2 bg-gray-100 rounded-lg text-gray-600">
+                    <div className="flex-shrink-0 rounded-md bg-muted p-2 text-muted-foreground">
                         {icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -85,10 +85,10 @@ export function EmptySummaryCard({
     onAction
 }: EmptySummaryCardProps) {
     const content = (
-        <Card className="border-dashed bg-gray-50/50">
+        <Card className="border-dashed bg-transparent shadow-none">
             <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                    <div className="flex-shrink-0 text-gray-400">
+                    <div className="flex-shrink-0 text-muted-foreground/60">
                         {icon}
                     </div>
                     <span className="text-sm text-muted-foreground">{title}</span>

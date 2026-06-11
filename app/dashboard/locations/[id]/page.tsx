@@ -17,7 +17,7 @@ export default async function EditLocationPage({
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Edit Location</h1>
+                <h1 className="font-serif text-2xl font-semibold tracking-tight">Edit Location</h1>
                 <p className="text-muted-foreground">Update location information.</p>
             </div>
             <LocationForm location={location} />

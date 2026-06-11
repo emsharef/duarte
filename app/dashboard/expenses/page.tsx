@@ -32,7 +32,7 @@ export default async function ExpensesPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Expenses</h1>
                     <p className="text-muted-foreground">Track costs associated with your collection.</p>
                 </div>
                 <Link href="/dashboard/expenses/new">

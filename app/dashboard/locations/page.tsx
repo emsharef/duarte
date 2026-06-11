@@ -19,7 +19,7 @@ export default async function LocationsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Locations</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Locations</h1>
                     <p className="text-muted-foreground">Manage storage locations for your collection.</p>
                 </div>
                 <Link href="/dashboard/locations/new">

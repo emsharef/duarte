@@ -32,7 +32,7 @@ export default async function AcquisitionsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Acquisitions</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Acquisitions</h1>
                     <p className="text-muted-foreground">Track purchases, gifts, and other acquisitions.</p>
                 </div>
                 <Link href="/dashboard/acquisitions/new">

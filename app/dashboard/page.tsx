@@ -169,15 +169,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     return (
         <SelectionProvider scope="objects">
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
-                        <p className="text-muted-foreground">Manage your art collection.</p>
-                    </div>
+                <div className="flex items-baseline justify-between gap-4 border-b pb-4">
+                    <h1 className="font-serif text-3xl font-medium tracking-tight">Inventory</h1>
+                    <p className="text-sm text-muted-foreground">
+                        {rows.length} object{rows.length === 1 ? '' : 's'} in view
+                    </p>
                 </div>
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-10">
                     <FilterRail
-                        className="hidden w-56 shrink-0 md:block"
+                        className="hidden w-52 shrink-0 md:block"
                         bucketCounts={bucketCounts}
                         artists={artistItems}
                         locations={locationItems}

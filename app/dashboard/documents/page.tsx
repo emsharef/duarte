@@ -38,7 +38,7 @@ export default async function DocumentsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Documents</h1>
                     <p className="text-muted-foreground">Manage documents and files for your collection.</p>
                 </div>
                 <Link href="/dashboard/documents/new">
