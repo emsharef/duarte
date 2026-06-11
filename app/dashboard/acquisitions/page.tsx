@@ -31,21 +31,31 @@ export default async function AcquisitionsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Acquisitions</h1>
                     <p className="text-muted-foreground">Track purchases, gifts, and other acquisitions.</p>
                 </div>
                 <Link href="/dashboard/acquisitions/new">
-                    <Button>
+                    <Button size="sm" className="h-9">
                         <Plus className="mr-2 h-4 w-4" />
                         Add Acquisition
                     </Button>
                 </Link>
             </div>
 
+            {acquisitions.length === 0 ? (
+                <EmptyState
+                    text="No acquisitions yet."
+                    action={
+                        <Link href="/dashboard/acquisitions/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                            Record your first acquisition
+                        </Link>
+                    }
+                />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Subject</TableHead>
@@ -79,23 +89,10 @@ export default async function AcquisitionsPage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {acquisitions.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={7} className="p-3">
-                                    <EmptyState
-                                        text="No acquisitions yet."
-                                        action={
-                                            <Link href="/dashboard/acquisitions/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
-                                                Record your first acquisition
-                                            </Link>
-                                        }
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }

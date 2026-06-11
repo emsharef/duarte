@@ -31,21 +31,31 @@ export default async function ValuationsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Valuations</h1>
                     <p className="text-muted-foreground">Track appraisals and collection valuations.</p>
                 </div>
                 <Link href="/dashboard/valuations/new">
-                    <Button>
+                    <Button size="sm" className="h-9">
                         <Plus className="mr-2 h-4 w-4" />
                         Add Valuation
                     </Button>
                 </Link>
             </div>
 
+            {valuations.length === 0 ? (
+                <EmptyState
+                    text="No valuations yet."
+                    action={
+                        <Link href="/dashboard/valuations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                            Create your first valuation
+                        </Link>
+                    }
+                />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Subject</TableHead>
@@ -85,23 +95,10 @@ export default async function ValuationsPage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {valuations.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={8} className="p-3">
-                                    <EmptyState
-                                        text="No valuations yet."
-                                        action={
-                                            <Link href="/dashboard/valuations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
-                                                Create your first valuation
-                                            </Link>
-                                        }
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }

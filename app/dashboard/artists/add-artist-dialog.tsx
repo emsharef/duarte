@@ -57,7 +57,7 @@ export function AddArtistDialog() {
     return (
         <Dialog open={open} onOpenChange={(next) => { setOpen(next); setError(null) }}>
             <DialogTrigger asChild>
-                <Button>
+                <Button size="sm" className="h-9">
                     <Plus className="mr-2 h-4 w-4" />
                     Add Artist
                 </Button>

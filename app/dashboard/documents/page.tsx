@@ -37,21 +37,31 @@ export default async function DocumentsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Documents</h1>
                     <p className="text-muted-foreground">Manage documents and files for your collection.</p>
                 </div>
                 <Link href="/dashboard/documents/new">
-                    <Button>
+                    <Button size="sm" className="h-9">
                         <Plus className="mr-2 h-4 w-4" />
                         Upload Document
                     </Button>
                 </Link>
             </div>
 
+            {documents.length === 0 ? (
+                <EmptyState
+                    text="No documents yet."
+                    action={
+                        <Link href="/dashboard/documents/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                            Upload your first document
+                        </Link>
+                    }
+                />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
@@ -108,23 +118,10 @@ export default async function DocumentsPage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {documents.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={6} className="p-3">
-                                    <EmptyState
-                                        text="No documents yet."
-                                        action={
-                                            <Link href="/dashboard/documents/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
-                                                Upload your first document
-                                            </Link>
-                                        }
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }

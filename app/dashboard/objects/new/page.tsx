@@ -131,9 +131,9 @@ export default function NewObjectPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-8 pb-10">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Add New Object</h1>
+                    <h1 className="font-serif text-2xl font-semibold tracking-tight">Add New Object</h1>
                     <p className="text-muted-foreground">Create a new inventory record.</p>
                 </div>
             </div>

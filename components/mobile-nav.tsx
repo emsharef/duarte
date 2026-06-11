@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Menu, PlusCircle } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Sidebar } from '@/components/sidebar'
 
@@ -47,13 +46,6 @@ export function MobileNav({
             <span className="font-serif text-lg font-semibold tracking-tight text-white">
                 DuArte
             </span>
-            <Link
-                href="/dashboard/objects/new"
-                aria-label="Add object"
-                className="ml-auto flex h-9 w-9 items-center justify-center rounded-md text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            >
-                <PlusCircle className="h-5 w-5" />
-            </Link>
         </header>
     )
 }

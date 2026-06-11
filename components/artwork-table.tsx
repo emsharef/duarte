@@ -108,6 +108,10 @@ export function ArtworkTable({
 
     return (
         <div className="space-y-3">
+            {/* Empty state lives outside the scroll container so it centers on the viewport, not the 640px table */}
+            {data.length === 0 ? (
+                <EmptyState text="No objects match the current filters." />
+            ) : (
             <div className="overflow-x-auto border-y">
                 <Table className="min-w-[640px]">
                     <TableHeader>
@@ -134,33 +138,25 @@ export function ArtworkTable({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {pageRows.length ? (
-                            pageRows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
-                                    className="cursor-pointer"
-                                    onClick={(e) => {
-                                        // Don't navigate if clicking on a link, button or checkbox
-                                        const target = e.target as HTMLElement
-                                        if (target.closest('a') || target.closest('button') || target.closest('input')) return
-                                        router.push(`/dashboard/objects/${row.original.id}${ctxRef.current}`)
-                                    }}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={columns.length} className="p-3">
-                                    <EmptyState text="No objects match the current filters." />
-                                </TableCell>
+                        {pageRows.map((row) => (
+                            <TableRow
+                                key={row.id}
+                                data-state={row.getIsSelected() && 'selected'}
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                    // Don't navigate if clicking on a link, button or checkbox
+                                    const target = e.target as HTMLElement
+                                    if (target.closest('a') || target.closest('button') || target.closest('input')) return
+                                    router.push(`/dashboard/objects/${row.original.id}${ctxRef.current}`)
+                                }}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </TableCell>
+                                ))}
                             </TableRow>
-                        )}
+                        ))}
                     </TableBody>
                     {domesticKeys.length > 0 && data.length > 0 && (
                         <TableFooter>
@@ -186,7 +182,9 @@ export function ArtworkTable({
                     )}
                 </Table>
             </div>
-            <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+            )}
+            {/* Count + pagination stay outside the scroll container so they center on the viewport */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
                 <div>
                     {data.length} object{data.length === 1 ? '' : 's'}
                     {pageCount > 1 && ` · Page ${pageIndex + 1} of ${pageCount}`}

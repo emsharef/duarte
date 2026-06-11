@@ -31,21 +31,31 @@ export default async function InsurancePage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Insurance Policies</h1>
                     <p className="text-muted-foreground">Manage insurance coverage for your collection.</p>
                 </div>
                 <Link href="/dashboard/insurance/new">
-                    <Button>
+                    <Button size="sm" className="h-9">
                         <Plus className="mr-2 h-4 w-4" />
                         Add Policy
                     </Button>
                 </Link>
             </div>
 
+            {policies.length === 0 ? (
+                <EmptyState
+                    text="No insurance policies yet."
+                    action={
+                        <Link href="/dashboard/insurance/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                            Add your first policy
+                        </Link>
+                    }
+                />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[720px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Policy</TableHead>
@@ -83,23 +93,10 @@ export default async function InsurancePage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {policies.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={9} className="p-3">
-                                    <EmptyState
-                                        text="No insurance policies yet."
-                                        action={
-                                            <Link href="/dashboard/insurance/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
-                                                Add your first policy
-                                            </Link>
-                                        }
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }

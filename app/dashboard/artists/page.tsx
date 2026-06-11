@@ -17,7 +17,7 @@ export default async function ArtistsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Artists</h1>
                     <p className="text-muted-foreground">Manage artist profiles and details.</p>
@@ -25,8 +25,11 @@ export default async function ArtistsPage() {
                 <AddArtistDialog />
             </div>
 
+            {artists.length === 0 ? (
+                <EmptyState text="No artists yet. Use Add Artist to create one." />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Last Name</TableHead>
@@ -54,16 +57,10 @@ export default async function ArtistsPage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {artists.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={7} className="p-3">
-                                    <EmptyState text="No artists yet. Use Add Artist to create one." />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }

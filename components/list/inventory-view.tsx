@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import type { SortingState } from '@tanstack/react-table'
-import { Bookmark, LayoutGrid, Search, Settings2, Table2, Trash2 } from 'lucide-react'
+import { Bookmark, LayoutGrid, Search, SlidersHorizontal, Table2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -184,7 +184,7 @@ export function InventoryView({
                     />
                 </div>
                 <Select value={searchField} onValueChange={setSearchField}>
-                    <SelectTrigger className="h-9 w-32 border-input bg-background text-[13px] text-muted-foreground shadow-none">
+                    <SelectTrigger className="h-9 min-w-0 flex-1 border-input bg-background text-[13px] text-muted-foreground shadow-none sm:w-32 sm:flex-none">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -208,9 +208,11 @@ export function InventoryView({
                     {/* View switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-9">
-                                <Bookmark className="mr-1.5 h-4 w-4 text-muted-foreground" />
-                                {activeView ? activeView.name : 'Views'}
+                            <Button variant="outline" size="sm" className="h-9" title="Views">
+                                <Bookmark className="h-4 w-4 text-muted-foreground sm:mr-1.5" />
+                                <span className="hidden sm:inline">
+                                    {activeView ? activeView.name : 'Views'}
+                                </span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -252,10 +254,11 @@ export function InventoryView({
                         variant="outline"
                         size="sm"
                         className="h-9"
+                        title="Columns"
                         onClick={() => setColumnsOpen(true)}
                     >
-                        <Settings2 className="mr-1.5 h-4 w-4 text-muted-foreground" />
-                        Columns
+                        <SlidersHorizontal className="h-4 w-4 text-muted-foreground sm:mr-1.5" />
+                        <span className="hidden sm:inline">Columns</span>
                     </Button>
 
                     {/* Table / gallery toggle */}

@@ -18,21 +18,31 @@ export default async function LocationsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Locations</h1>
                     <p className="text-muted-foreground">Manage storage locations for your collection.</p>
                 </div>
                 <Link href="/dashboard/locations/new">
-                    <Button>
+                    <Button size="sm" className="h-9">
                         <Plus className="mr-2 h-4 w-4" />
                         Add Location
                     </Button>
                 </Link>
             </div>
 
+            {locations.length === 0 ? (
+                <EmptyState
+                    text="No locations yet."
+                    action={
+                        <Link href="/dashboard/locations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                            Add your first location
+                        </Link>
+                    }
+                />
+            ) : (
             <div className="border rounded-md">
-                <Table>
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
@@ -64,23 +74,10 @@ export default async function LocationsPage() {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {locations.length === 0 && (
-                            <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={7} className="p-3">
-                                    <EmptyState
-                                        text="No locations yet."
-                                        action={
-                                            <Link href="/dashboard/locations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
-                                                Add your first location
-                                            </Link>
-                                        }
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
+            )}
         </div>
     )
 }
