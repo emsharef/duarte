@@ -21,6 +21,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogFooter,
@@ -187,6 +188,9 @@ export function CategoryPicker({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New Category</DialogTitle>
+                        <DialogDescription>
+                            Add a new category for organizing objects in this workspace.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">

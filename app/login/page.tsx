@@ -9,7 +9,7 @@ export default async function LoginPage({
     return (
         <div className="flex h-screen w-full items-center justify-center bg-gray-50">
             <form className="flex w-full max-w-sm flex-col gap-4 rounded-lg border bg-white p-8 shadow-sm">
-                <h1 className="text-2xl font-semibold tracking-tight">DūArte</h1>
+                <h1 className="text-2xl font-semibold tracking-tight">DuArte</h1>
                 {next ? <input type="hidden" name="next" value={next} /> : null}
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email" className="text-sm font-medium">Email</label>

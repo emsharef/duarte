@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -173,6 +173,9 @@ export function LoansTab({ object, canEdit }: { object: ObjectWithRelations; can
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit loan value</DialogTitle>
+                        <DialogDescription>
+                            Update the declared value for this object on the loan.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-2">
                         <Label>Loan value</Label>

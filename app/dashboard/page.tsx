@@ -4,7 +4,7 @@ import { r2 } from '@/lib/r2'
 import { getWorkspaceContext } from '@/lib/workspace'
 import { getObjectsGrid, listSavedViews, type GridFilters } from '@/app/actions/views'
 import { STATUS_BUCKETS, type GridRow, type StatusBucket } from '@/lib/list-columns'
-import { FilterRail, type RailItem } from '@/components/list/filter-rail'
+import { type FilterItem } from '@/components/list/filter-toolbar'
 import { InventoryView } from '@/components/list/inventory-view'
 import { SelectionProvider } from '@/components/list/selection'
 
@@ -124,7 +124,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         signed_url: r.id ? (signedUrlByObject[r.id] ?? null) : null,
     }))
 
-    // Rail counts from the lightweight workspace-wide facet query
+    // Filter counts from the lightweight workspace-wide facet query
     const bucketCounts: Record<StatusBucket, number> = { current: 0, incoming: 0, former: 0 }
     const artistCounts: Record<string, number> = {}
     const locationCounts: Record<string, number> = {}
@@ -141,24 +141,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         groupCounts[og.group_id] = (groupCounts[og.group_id] ?? 0) + 1
     }
 
-    const artistItems: RailItem[] = (artists ?? []).map((a) => ({
+    const artistItems: FilterItem[] = (artists ?? []).map((a) => ({
         id: a.id,
         name:
             `${a.first_name ?? ''} ${a.last_name ?? ''}`.trim() || a.company || 'Unnamed artist',
         count: artistCounts[a.id] ?? 0,
     }))
-    const locationItems: RailItem[] = (locations ?? []).map((l) => ({
+    const locationItems: FilterItem[] = (locations ?? []).map((l) => ({
         id: l.id,
         name: l.name,
         parent_id: l.parent_id,
         count: locationCounts[l.id] ?? 0,
     }))
-    const categoryItems: RailItem[] = (categories ?? []).map((c) => ({
+    const categoryItems: FilterItem[] = (categories ?? []).map((c) => ({
         id: c.id,
         name: c.name,
         count: categoryCounts[c.id] ?? 0,
     }))
-    const groupItems: RailItem[] = (groups ?? []).map((g) => ({
+    const groupItems: FilterItem[] = (groups ?? []).map((g) => ({
         id: g.id,
         name: g.name,
         count: groupCounts[g.id] ?? 0,
@@ -168,35 +168,34 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
     return (
         <SelectionProvider scope="objects">
-            <div className="space-y-6">
-                <div className="flex items-baseline justify-between gap-4 border-b pb-4">
-                    <h1 className="font-serif text-3xl font-medium tracking-tight">Inventory</h1>
-                    <p className="text-sm text-muted-foreground">
-                        {rows.length} object{rows.length === 1 ? '' : 's'} in view
-                    </p>
-                </div>
-                <div className="flex items-start gap-10">
-                    <FilterRail
-                        className="hidden w-52 shrink-0 md:block"
-                        bucketCounts={bucketCounts}
-                        artists={artistItems}
-                        locations={locationItems}
-                        categories={categoryItems}
-                        groups={groupItems}
-                    />
-                    <div className="min-w-0 flex-1">
-                        <InventoryView
-                            rows={rows}
-                            savedViews={savedViews}
-                            groups={(groups ?? []).map((g) => ({ id: g.id, name: g.name }))}
-                            defaultCurrency={defaultCurrency}
-                            canEdit={canEdit}
-                            mode={mode}
-                            initialSearch={str(sp.q) ?? ''}
-                            initialSearchField={str(sp.field) ?? 'all'}
-                        />
+            <div>
+                <div className="mb-6 border-b pb-4">
+                    <div className="flex items-baseline gap-3">
+                        <h1 className="font-serif text-3xl font-medium tracking-tight">
+                            Inventory
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            {rows.length} object{rows.length === 1 ? '' : 's'} in view
+                        </p>
                     </div>
                 </div>
+                <InventoryView
+                    rows={rows}
+                    savedViews={savedViews}
+                    filterData={{
+                        totalCount: (facets ?? []).length,
+                        bucketCounts,
+                        artists: artistItems,
+                        locations: locationItems,
+                        categories: categoryItems,
+                        groups: groupItems,
+                    }}
+                    defaultCurrency={defaultCurrency}
+                    canEdit={canEdit}
+                    mode={mode}
+                    initialSearch={str(sp.q) ?? ''}
+                    initialSearchField={str(sp.field) ?? 'all'}
+                />
             </div>
         </SelectionProvider>
     )

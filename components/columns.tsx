@@ -89,7 +89,7 @@ function sortableHeader(def: ListColumnDef): ColumnDef<GridRow>['header'] {
             <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 h-8 px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                className="-ml-2 h-8 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             >
                 {def.label}
@@ -111,6 +111,8 @@ function toColumnDef(def: ListColumnDef, defaultCurrency: string): ColumnDef<Gri
 
     switch (def.type) {
         case 'image':
+            // Blank header for the thumbnail column
+            base.header = () => null
             base.cell = ({ row }) => {
                 const url = row.original.signed_url
                 if (!url) return <div className="h-10 w-10 rounded-sm bg-muted ring-1 ring-border" />

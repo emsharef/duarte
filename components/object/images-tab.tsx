@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import {
     ObjectWithRelations, addObjectMedia, deleteObjectMedia,
@@ -173,6 +173,9 @@ export function ImagesTab({ object, canEdit }: ImagesTabProps) {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit image details</DialogTitle>
+                        <DialogDescription>
+                            Update the name and details for this image.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid gap-2">

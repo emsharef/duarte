@@ -12,6 +12,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
     Table,
@@ -112,7 +113,14 @@ export function ArtworkTable({
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
+                                    <TableHead
+                                        key={header.id}
+                                        className={cn(
+                                            header.column.id === 'select' && 'w-8',
+                                            header.column.id === 'image' && 'w-12',
+                                            header.column.id === 'actions' && 'w-10'
+                                        )}
+                                    >
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -147,7 +155,10 @@ export function ArtworkTable({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center text-[13px] text-muted-foreground"
+                                >
                                     No objects match the current filters.
                                 </TableCell>
                             </TableRow>
@@ -177,7 +188,7 @@ export function ArtworkTable({
                     )}
                 </Table>
             </div>
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                 <div>
                     {data.length} object{data.length === 1 ? '' : 's'}
                     {pageCount > 1 && ` · Page ${pageIndex + 1} of ${pageCount}`}

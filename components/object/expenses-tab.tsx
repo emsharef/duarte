@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -136,6 +136,9 @@ export function ExpensesTab({ object, canEdit }: { object: ObjectWithRelations; 
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>{editingId ? 'Edit expense' : 'Add expense'}</DialogTitle>
+                        <DialogDescription>
+                            Record the type, amount and date for this expense.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
                         <div className="grid gap-2">

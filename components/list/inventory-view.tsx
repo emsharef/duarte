@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import type { SortingState } from '@tanstack/react-table'
 import { Bookmark, LayoutGrid, Search, Settings2, Table2, Trash2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -28,6 +29,12 @@ import { ArtworkTable } from '@/components/artwork-table'
 import { buildColumns } from '@/components/columns'
 import { BatchTray } from '@/components/list/batch-tray'
 import { ColumnSettingsDialog } from '@/components/list/column-settings-dialog'
+import {
+    FilterButton,
+    FilterChips,
+    StatusTabs,
+    type FilterData,
+} from '@/components/list/filter-toolbar'
 import { GalleryGrid } from '@/components/list/gallery-grid'
 import { deleteView, saveView, type SavedView } from '@/app/actions/views'
 import {
@@ -43,7 +50,7 @@ import {
 type InventoryViewProps = {
     rows: GridRow[]
     savedViews: SavedView[]
-    groups: { id: string; name: string }[]
+    filterData: FilterData
     defaultCurrency: string
     canEdit: boolean
     mode: 'table' | 'gallery'
@@ -69,7 +76,7 @@ function parseViewConfig(config: unknown): SavedViewConfig | null {
 export function InventoryView({
     rows,
     savedViews,
-    groups,
+    filterData,
     defaultCurrency,
     canEdit,
     mode,
@@ -161,11 +168,23 @@ export function InventoryView({
     const activeView = savedViews.find((v) => v.id === activeViewId)
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
+            {/* Toolbar: one consistent 36px control row */}
             <div className="flex flex-wrap items-center gap-2">
-                {/* Scoped search */}
+                <div className="relative">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search…"
+                        className="h-9 w-56 border-input bg-background pl-8 shadow-none"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') submitSearch()
+                        }}
+                    />
+                </div>
                 <Select value={searchField} onValueChange={setSearchField}>
-                    <SelectTrigger className="w-36">
+                    <SelectTrigger className="h-9 w-32 border-input bg-background text-[13px] text-muted-foreground shadow-none">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -176,29 +195,21 @@ export function InventoryView({
                         ))}
                     </SelectContent>
                 </Select>
-                <div className="flex items-center gap-1">
-                    <Input
-                        placeholder="Search…"
-                        className="w-48"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') submitSearch()
-                        }}
-                    />
-                    <Button variant="outline" size="icon" onClick={submitSearch} aria-label="Search">
-                        <Search className="h-4 w-4" />
-                    </Button>
-                </div>
+                <FilterButton data={filterData} />
 
                 <div className="ml-auto flex flex-wrap items-center gap-2">
-                    <BatchTray rows={rows} visibleKeys={visibleColumns} canEdit={canEdit} groups={groups} />
+                    <BatchTray
+                        rows={rows}
+                        visibleKeys={visibleColumns}
+                        canEdit={canEdit}
+                        groups={filterData.groups}
+                    />
 
                     {/* View switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <Bookmark className="mr-1.5 h-4 w-4" />
+                            <Button variant="outline" size="sm" className="h-9">
+                                <Bookmark className="mr-1.5 h-4 w-4 text-muted-foreground" />
                                 {activeView ? activeView.name : 'Views'}
                             </Button>
                         </DropdownMenuTrigger>
@@ -237,26 +248,37 @@ export function InventoryView({
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="outline" size="sm" onClick={() => setColumnsOpen(true)}>
-                        <Settings2 className="mr-1.5 h-4 w-4" />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9"
+                        onClick={() => setColumnsOpen(true)}
+                    >
+                        <Settings2 className="mr-1.5 h-4 w-4 text-muted-foreground" />
                         Columns
                     </Button>
 
                     {/* Table / gallery toggle */}
-                    <div className="flex rounded-md border">
+                    <div className="flex h-9 items-center overflow-hidden rounded-md border border-input bg-background">
                         <Button
-                            variant={mode === 'table' ? 'secondary' : 'ghost'}
+                            variant="ghost"
                             size="icon"
-                            className="rounded-r-none"
+                            className={cn(
+                                'h-full w-9 rounded-none',
+                                mode === 'table' && 'bg-accent text-foreground'
+                            )}
                             onClick={() => setMode('table')}
                             aria-label="Table view"
                         >
                             <Table2 className="h-4 w-4" />
                         </Button>
                         <Button
-                            variant={mode === 'gallery' ? 'secondary' : 'ghost'}
+                            variant="ghost"
                             size="icon"
-                            className="rounded-l-none"
+                            className={cn(
+                                'h-full w-9 rounded-none',
+                                mode === 'gallery' && 'bg-accent text-foreground'
+                            )}
                             onClick={() => setMode('gallery')}
                             aria-label="Gallery view"
                         >
@@ -265,6 +287,12 @@ export function InventoryView({
                     </div>
                 </div>
             </div>
+
+            {/* Active filter chips */}
+            <FilterChips data={filterData} />
+
+            {/* Status bucket pills, directly above the table */}
+            <StatusTabs data={filterData} />
 
             {mode === 'gallery' ? (
                 <GalleryGrid rows={rows} canEdit={canEdit} />

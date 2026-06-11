@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { ObjectWithRelations, updateObjectInsurance } from '@/app/dashboard/objects/actions'
 import {
@@ -163,6 +163,9 @@ export function InsuranceTab({ object, canEdit }: { object: ObjectWithRelations;
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit insured value</DialogTitle>
+                        <DialogDescription>
+                            Update the insured value for this object on the policy.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-2">
                         <Label>Insured value</Label>

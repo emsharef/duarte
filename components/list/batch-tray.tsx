@@ -133,7 +133,7 @@ export function BatchTray({ rows, visibleKeys, canEdit, groups }: BatchTrayProps
                 </Badge>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" disabled={pending}>
+                        <Button variant="outline" size="sm" className="h-9" disabled={pending}>
                             Actions
                             <ChevronDown className="ml-1 h-3.5 w-3.5" />
                         </Button>

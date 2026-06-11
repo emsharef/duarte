@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { ObjectWithRelations } from '@/app/dashboard/objects/actions'
 import {
@@ -167,6 +167,9 @@ export function ValuationsTab({ object, canEdit }: { object: ObjectWithRelations
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit appraised value</DialogTitle>
+                        <DialogDescription>
+                            Update the appraised value for this object on the valuation.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-2">
                         <Label>Appraised value</Label>

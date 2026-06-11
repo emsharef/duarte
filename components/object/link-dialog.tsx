@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -75,6 +75,9 @@ export function LinkDialog({
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>
+                        Link an existing {noun} to this object, or create a new one.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="flex rounded-lg border p-0.5">

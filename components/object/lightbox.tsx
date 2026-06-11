@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
 type LightboxMedia = {
@@ -47,6 +47,9 @@ export function Lightbox({ media, open, onOpenChange, startIndex = 0 }: Lightbox
                 }}
             >
                 <DialogTitle className="sr-only">{item.name || 'Image'}</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Full-size image preview. Use the arrow keys to move between images.
+                </DialogDescription>
                 <div className="relative flex items-center justify-center bg-black/95 rounded-md min-h-[60vh]">
                     {item.signed_url ? (
                         <img

@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DūArte",
+  title: "DuArte",
   description: "Art collection management",
 };
 

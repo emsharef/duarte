@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -136,6 +137,9 @@ export function ColumnSettingsDialog({
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle>Customize columns</DialogTitle>
+                    <DialogDescription>
+                        Choose which columns appear in the list and how many rows show per page.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                     <div className="space-y-1.5">

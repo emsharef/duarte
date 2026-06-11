@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { ObjectWithRelations } from '@/app/dashboard/objects/actions'
 import {
@@ -170,6 +170,9 @@ export function AcquisitionTab({ object, canEdit }: { object: ObjectWithRelation
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit acquisition link</DialogTitle>
+                        <DialogDescription>
+                            Update the price and lot details for this object on the acquisition.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
                         <div className="grid gap-2">

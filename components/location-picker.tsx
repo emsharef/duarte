@@ -21,6 +21,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogFooter,
@@ -232,6 +233,9 @@ export function LocationPicker({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New Location</DialogTitle>
+                        <DialogDescription>
+                            Add a new location for storing or displaying objects.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">

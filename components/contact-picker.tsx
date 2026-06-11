@@ -21,6 +21,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogFooter,
@@ -238,6 +239,9 @@ export function ContactPicker({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New Contact</DialogTitle>
+                        <DialogDescription>
+                            Add a new contact to this workspace.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
