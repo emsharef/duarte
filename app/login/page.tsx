@@ -1,5 +1,7 @@
 import { login, loginWithGoogle } from './actions'
 
+const inputClass = 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
+
 export default async function LoginPage({
     searchParams,
 }: {
@@ -7,27 +9,37 @@ export default async function LoginPage({
 }) {
     const { next } = await searchParams
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-            <form className="flex w-full max-w-sm flex-col gap-4 rounded-lg border bg-white p-8 shadow-sm">
-                <h1 className="text-2xl font-semibold tracking-tight">DuArte</h1>
+        <div className="flex min-h-screen w-full items-center justify-center bg-background px-6">
+            <form className="flex w-full max-w-sm flex-col gap-5 border-y border-border py-10">
+                <div className="mb-2 text-center">
+                    <h1 className="font-serif text-3xl font-semibold tracking-tight">DuArte</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">Collection management</p>
+                </div>
                 {next ? <input type="hidden" name="next" value={next} /> : null}
-                <div className="flex flex-col gap-2">
-                    <label htmlFor="email" className="text-sm font-medium">Email</label>
-                    <input id="email" name="email" type="email" required className="rounded-md border px-3 py-2 text-sm" />
+                <div className="flex flex-col gap-1.5">
+                    <label htmlFor="email" className="text-[13px] font-medium">Email</label>
+                    <input id="email" name="email" type="email" autoComplete="email" required className={inputClass} />
                 </div>
-                <div className="flex flex-col gap-2">
-                    <label htmlFor="password" className="text-sm font-medium">Password</label>
-                    <input id="password" name="password" type="password" required className="rounded-md border px-3 py-2 text-sm" />
+                <div className="flex flex-col gap-1.5">
+                    <label htmlFor="password" className="text-[13px] font-medium">Password</label>
+                    <input id="password" name="password" type="password" autoComplete="current-password" required className={inputClass} />
                 </div>
-                <button formAction={login} className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                <button
+                    formAction={login}
+                    className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
+                >
                     Sign In
                 </button>
                 <div className="flex items-center gap-3">
-                    <div className="h-px flex-1 bg-gray-200" />
-                    <span className="text-xs text-gray-400">or</span>
-                    <div className="h-px flex-1 bg-gray-200" />
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground">or</span>
+                    <div className="h-px flex-1 bg-border" />
                 </div>
-                <button formAction={loginWithGoogle} formNoValidate className="flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50">
+                <button
+                    formAction={loginWithGoogle}
+                    formNoValidate
+                    className="flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />

@@ -1,6 +1,7 @@
 import { getDocumentsWithUrls } from '@/app/actions/documents'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus, FileText, Download, ExternalLink } from 'lucide-react'
 import {
     Table,
@@ -108,9 +109,16 @@ export default async function DocumentsPage() {
                             </TableRow>
                         ))}
                         {documents.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    No documents found. Upload your first document.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={6} className="p-3">
+                                    <EmptyState
+                                        text="No documents yet."
+                                        action={
+                                            <Link href="/dashboard/documents/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Upload your first document
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

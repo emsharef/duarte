@@ -146,12 +146,5 @@ export function SectionHeader({ title, action }: { title: string; action?: React
     )
 }
 
-// Single empty-state pattern: quiet, centered, with at most one action.
-export function EmptyState({ text, action }: { text: string; action?: React.ReactNode }) {
-    return (
-        <div className="flex flex-col items-center gap-3 border border-dashed border-border px-8 py-12 text-center">
-            <p className="text-sm text-muted-foreground/80">{text}</p>
-            {action}
-        </div>
-    )
-}
+// Single empty-state pattern shared across the app.
+export { EmptyState } from '@/components/empty-state'

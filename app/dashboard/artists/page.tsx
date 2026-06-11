@@ -1,7 +1,8 @@
 import { getArtists } from '@/app/actions/artists'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { EmptyState } from '@/components/empty-state'
+import { AddArtistDialog } from './add-artist-dialog'
 import {
     Table,
     TableBody,
@@ -21,8 +22,7 @@ export default async function ArtistsPage() {
                     <h1 className="font-serif text-2xl font-semibold tracking-tight">Artists</h1>
                     <p className="text-muted-foreground">Manage artist profiles and details.</p>
                 </div>
-                {/* We can add a "Create Artist" button here later if needed, 
-            but for now we rely on the object creation flow or just add a simple one */}
+                <AddArtistDialog />
             </div>
 
             <div className="border rounded-md">
@@ -55,9 +55,9 @@ export default async function ArtistsPage() {
                             </TableRow>
                         ))}
                         {artists.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
-                                    No artists found.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={7} className="p-3">
+                                    <EmptyState text="No artists yet. Use Add Artist to create one." />
                                 </TableCell>
                             </TableRow>
                         )}

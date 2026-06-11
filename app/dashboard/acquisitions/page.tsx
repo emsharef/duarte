@@ -1,6 +1,7 @@
 import { getAcquisitions } from '@/app/actions/acquisitions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus } from 'lucide-react'
 import {
     Table,
@@ -79,9 +80,16 @@ export default async function AcquisitionsPage() {
                             </TableRow>
                         ))}
                         {acquisitions.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
-                                    No acquisitions found. Record your first acquisition.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={7} className="p-3">
+                                    <EmptyState
+                                        text="No acquisitions yet."
+                                        action={
+                                            <Link href="/dashboard/acquisitions/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Record your first acquisition
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

@@ -1,6 +1,7 @@
 import { getLocationsWithCounts } from '@/app/actions/locations'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus } from 'lucide-react'
 import {
     Table,
@@ -64,9 +65,16 @@ export default async function LocationsPage() {
                             </TableRow>
                         ))}
                         {locations.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
-                                    No locations found. Add your first location.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={7} className="p-3">
+                                    <EmptyState
+                                        text="No locations yet."
+                                        action={
+                                            <Link href="/dashboard/locations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Add your first location
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

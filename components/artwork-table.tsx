@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import {
     Table,
     TableBody,
@@ -154,12 +155,9 @@ export function ArtworkTable({
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center text-[13px] text-muted-foreground"
-                                >
-                                    No objects match the current filters.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={columns.length} className="p-3">
+                                    <EmptyState text="No objects match the current filters." />
                                 </TableCell>
                             </TableRow>
                         )}

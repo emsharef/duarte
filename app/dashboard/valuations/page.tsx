@@ -1,6 +1,7 @@
 import { getValuations } from '@/app/actions/valuations'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus } from 'lucide-react'
 import {
     Table,
@@ -85,9 +86,16 @@ export default async function ValuationsPage() {
                             </TableRow>
                         ))}
                         {valuations.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={8} className="h-24 text-center">
-                                    No valuations found. Create your first valuation.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={8} className="p-3">
+                                    <EmptyState
+                                        text="No valuations yet."
+                                        action={
+                                            <Link href="/dashboard/valuations/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Create your first valuation
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

@@ -1,6 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { ImageIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { EmptyState } from '@/components/empty-state'
 import { useSelection } from '@/components/list/selection'
 import { StatusChip } from '@/components/list/status-chip'
 import type { GridRow } from '@/lib/list-columns'
@@ -16,46 +19,59 @@ export function GalleryGrid({ rows, canEdit }: { rows: GridRow[]; canEdit: boole
     const ctxQuery = ctxIds.length ? `?ctx=${ctxIds.join(',')}` : ''
 
     if (rows.length === 0) {
-        return (
-            <div className="flex h-40 items-center justify-center border border-dashed border-border text-sm text-muted-foreground/80">
-                No objects match the current filters.
-            </div>
-        )
+        return <EmptyState text="No objects match the current filters." />
     }
 
     return (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {rows.map((row) => {
                 if (!row.id) return null
+                const selected = selection.has(row.id)
+                const year = row.date_text ?? row.year_created ?? null
                 return (
-                    <div key={row.id} className="group relative overflow-hidden bg-card ring-1 ring-border">
-                        <input
-                            type="checkbox"
-                            className="absolute left-2 top-2 z-10 h-4 w-4 cursor-pointer accent-primary"
-                            aria-label="Select object"
-                            checked={selection.has(row.id)}
-                            onChange={() => selection.toggle(row.id!)}
-                        />
-                        <Link href={`/dashboard/objects/${row.id}${ctxQuery}`} className="block">
-                            {row.signed_url ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
-                                    src={row.signed_url}
-                                    alt={row.title ?? ''}
-                                    className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-                                />
-                            ) : (
-                                <div className="flex aspect-square w-full items-center justify-center bg-muted text-xs text-muted-foreground">
-                                    No image
-                                </div>
+                    <div
+                        key={row.id}
+                        className="group relative overflow-hidden rounded-md bg-card ring-1 ring-border transition-shadow hover:shadow-sm"
+                    >
+                        <div
+                            className={cn(
+                                'absolute left-2 top-2 z-10 flex items-center justify-center rounded bg-background/90 p-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100',
+                                selected && 'opacity-100'
                             )}
-                            <div className="space-y-0.5 p-3 pb-1.5">
-                                <p className="truncate font-medium">{row.title ?? 'Untitled'}</p>
-                                <p className="truncate text-sm text-muted-foreground">{row.artist_name ?? ''}</p>
+                        >
+                            <input
+                                type="checkbox"
+                                className="block h-4 w-4 cursor-pointer accent-primary"
+                                aria-label="Select object"
+                                checked={selected}
+                                onChange={() => selection.toggle(row.id!)}
+                            />
+                        </div>
+                        <Link href={`/dashboard/objects/${row.id}${ctxQuery}`} className="block">
+                            <div className="aspect-square w-full overflow-hidden bg-muted">
+                                {row.signed_url ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img
+                                        src={row.signed_url}
+                                        alt={row.title ?? ''}
+                                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center">
+                                        <ImageIcon className="h-6 w-6 text-muted-foreground/40" strokeWidth={1.5} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-3 pb-1.5">
+                                <p className="truncate text-sm font-medium">{row.title ?? 'Untitled'}</p>
+                                <p className="truncate text-xs text-muted-foreground">{row.artist_name ?? ' '}</p>
                             </div>
                         </Link>
-                        <div className="px-3 pb-3 pt-0.5">
+                        <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1">
                             <StatusChip objectId={row.id} status={row.status ?? ''} canEdit={canEdit} />
+                            {year ? (
+                                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{year}</span>
+                            ) : null}
                         </div>
                     </div>
                 )

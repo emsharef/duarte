@@ -1,6 +1,7 @@
 import { getLoansWithDetails } from '@/app/actions/loans'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus } from 'lucide-react'
 import {
     Table,
@@ -97,9 +98,16 @@ export default async function LoansPage() {
                             </TableRow>
                         ))}
                         {loans.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={8} className="h-24 text-center">
-                                    No loans found. Add your first loan.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={8} className="p-3">
+                                    <EmptyState
+                                        text="No loans yet."
+                                        action={
+                                            <Link href="/dashboard/loans/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Add your first loan
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

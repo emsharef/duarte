@@ -1,6 +1,7 @@
 import { getContacts } from '@/app/actions/contacts'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Plus } from 'lucide-react'
 import {
     Table,
@@ -66,9 +67,16 @@ export default async function ContactsPage() {
                             </TableRow>
                         ))}
                         {contacts.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
-                                    No contacts found. Add your first contact to get started.
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell colSpan={7} className="p-3">
+                                    <EmptyState
+                                        text="No contacts yet."
+                                        action={
+                                            <Link href="/dashboard/contacts/new" className="text-[13px] font-medium text-primary underline-offset-4 hover:underline">
+                                                Add your first contact
+                                            </Link>
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}
