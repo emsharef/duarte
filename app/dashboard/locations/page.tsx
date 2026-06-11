@@ -72,7 +72,7 @@ export default async function LocationsPage() {
                                 <TableCell className="text-center">{location.children_count || 0}</TableCell>
                                 <TableCell className="text-center">{location.object_count || 0}</TableCell>
                                 <TableCell className="text-right">
-                                    <Link href={`/dashboard/locations/${location.id}`}>
+                                    <Link href={`/dashboard/locations/${location.id}/edit`}>
                                         <Button variant="ghost" size="sm">Edit</Button>
                                     </Link>
                                 </TableCell>

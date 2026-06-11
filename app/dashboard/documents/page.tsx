@@ -113,7 +113,7 @@ export default async function DocumentsPage() {
                                                 </Button>
                                             </a>
                                         )}
-                                        <Link href={`/dashboard/documents/${doc.id}`}>
+                                        <Link href={`/dashboard/documents/${doc.id}/edit`}>
                                             <Button variant="ghost" size="sm">Edit</Button>
                                         </Link>
                                     </div>

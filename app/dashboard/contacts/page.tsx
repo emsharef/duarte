@@ -72,7 +72,7 @@ export default async function ContactsPage() {
                                 <TableCell>{contact.phone || '-'}</TableCell>
                                 <TableCell>{contact.city || '-'}</TableCell>
                                 <TableCell className="text-right">
-                                    <Link href={`/dashboard/contacts/${contact.id}`}>
+                                    <Link href={`/dashboard/contacts/${contact.id}/edit`}>
                                         <Button variant="ghost" size="sm">Edit</Button>
                                     </Link>
                                 </TableCell>

@@ -52,10 +52,11 @@ export function ContactForm({ contact }: ContactFormProps) {
         try {
             if (contact) {
                 await updateContact(contact.id, data)
+                router.push(`/dashboard/contacts/${contact.id}`)
             } else {
-                await createContact(data)
+                const newContact = await createContact(data)
+                router.push(`/dashboard/contacts/${newContact.id}`)
             }
-            router.push('/dashboard/contacts')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

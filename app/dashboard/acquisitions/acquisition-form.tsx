@@ -128,14 +128,15 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
                         await linkObjectToAcquisition(obj.id, acquisition.id, obj, true)
                     }
                 }
+                router.push(`/dashboard/acquisitions/${acquisition.id}`)
             } else {
                 const newAcquisition = await createAcquisition(data)
                 // Link selected objects to the new acquisition
                 for (const obj of selectedObjects) {
                     await linkObjectToAcquisition(obj.id, newAcquisition.id, obj)
                 }
+                router.push(`/dashboard/acquisitions/${newAcquisition.id}`)
             }
-            router.push('/dashboard/acquisitions')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

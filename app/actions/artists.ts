@@ -29,6 +29,17 @@ export async function getArtist(id: string) {
     return data
 }
 
+export async function getArtistObjects(artistId: string) {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('objects')
+        .select('id, title, inventory_number, year_created, date_text, status')
+        .eq('workspace_id', workspaceId)
+        .eq('artist_id', artistId)
+        .order('title', { ascending: true })
+    return data || []
+}
+
 export async function createArtist(data: Partial<Artist>) {
     const ctx = await getWorkspaceContext()
     requireEdit(ctx)

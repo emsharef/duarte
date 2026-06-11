@@ -103,7 +103,7 @@ export default async function LoansPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Link href={`/dashboard/loans/${loan.id}`}>
+                                    <Link href={`/dashboard/loans/${loan.id}/edit`}>
                                         <Button variant="ghost" size="sm">Edit</Button>
                                     </Link>
                                 </TableCell>

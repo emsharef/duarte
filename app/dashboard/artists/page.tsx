@@ -55,7 +55,7 @@ export default async function ArtistsPage() {
                                 <TableCell>{artist.birth_year || '-'}</TableCell>
                                 <TableCell>{artist.death_year || '-'}</TableCell>
                                 <TableCell className="text-right">
-                                    <Link href={`/dashboard/artists/${artist.id}`}>
+                                    <Link href={`/dashboard/artists/${artist.id}/edit`}>
                                         <Button variant="ghost" size="sm">Edit</Button>
                                     </Link>
                                 </TableCell>

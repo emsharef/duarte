@@ -87,7 +87,7 @@ export default async function AcquisitionsPage() {
                                 </TableCell>
                                 <TableCell className="text-center">{acq.object_count || 0}</TableCell>
                                 <TableCell className="text-right">
-                                    <Link href={`/dashboard/acquisitions/${acq.id}`}>
+                                    <Link href={`/dashboard/acquisitions/${acq.id}/edit`}>
                                         <Button variant="ghost" size="sm">Edit</Button>
                                     </Link>
                                 </TableCell>

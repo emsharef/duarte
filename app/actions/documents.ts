@@ -131,6 +131,37 @@ export async function getDocument(id: string) {
     }
 }
 
+// Resolve a document's entity links into labelled references for display.
+// Only object titles are resolved today (the only entity type the UI links).
+export async function getDocumentEntityLinks(documentId: string) {
+    const { supabase } = await getWorkspaceContext()
+    const { data: links } = await supabase
+        .from('entity_documents')
+        .select('entity_type, entity_id')
+        .eq('document_id', documentId)
+
+    if (!links || links.length === 0) return []
+
+    const objectIds = links.filter(l => l.entity_type === 'object').map(l => l.entity_id)
+    let titleMap: Record<string, string> = {}
+    if (objectIds.length > 0) {
+        const { data: objects } = await supabase
+            .from('objects')
+            .select('id, title')
+            .in('id', objectIds)
+        titleMap = (objects || []).reduce((acc, o) => {
+            acc[o.id] = o.title
+            return acc
+        }, {} as Record<string, string>)
+    }
+
+    return links.map(link => ({
+        entity_type: link.entity_type,
+        entity_id: link.entity_id,
+        label: titleMap[link.entity_id] || null,
+    }))
+}
+
 export async function getDocumentsForEntity(entityType: string, entityId: string) {
     const { supabase } = await getWorkspaceContext()
 

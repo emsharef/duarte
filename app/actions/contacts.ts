@@ -58,6 +58,28 @@ export async function getContact(id: string) {
     return data
 }
 
+export async function getContactAcquisitions(contactId: string) {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('acquisitions')
+        .select('id, acquisition_subject, acquisition_type, acquisition_date, total_cost, currency, acquired_from_contact_id, bought_by_contact_id')
+        .eq('workspace_id', workspaceId)
+        .or(`acquired_from_contact_id.eq.${contactId},bought_by_contact_id.eq.${contactId}`)
+        .order('acquisition_date', { ascending: false })
+    return data || []
+}
+
+export async function getContactLoans(contactId: string) {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('loans')
+        .select('id, loan_subject, direction, status, start_date, end_date, borrower_contact_id, lender_contact_id')
+        .eq('workspace_id', workspaceId)
+        .or(`borrower_contact_id.eq.${contactId},lender_contact_id.eq.${contactId}`)
+        .order('start_date', { ascending: false })
+    return data || []
+}
+
 export async function createContact(data: Partial<Contact>) {
     const ctx = await getWorkspaceContext()
     requireEdit(ctx)

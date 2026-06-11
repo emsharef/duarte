@@ -69,10 +69,11 @@ export function LoanForm({ loan }: LoanFormProps) {
         try {
             if (loan) {
                 await updateLoan(loan.id, data)
+                router.push(`/dashboard/loans/${loan.id}`)
             } else {
-                await createLoan(data)
+                const newLoan = await createLoan(data)
+                router.push(`/dashboard/loans/${newLoan.id}`)
             }
-            router.push('/dashboard/loans')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

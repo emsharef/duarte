@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormStatus } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import { updateArtist, type Artist } from '@/app/actions/artists'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 
 export function ArtistForm({ artist }: { artist: Artist }) {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     async function handleSubmit(formData: FormData) {
@@ -28,6 +29,8 @@ export function ArtistForm({ artist }: { artist: Artist }) {
                 bio: formData.get('bio') as string,
             }
             await updateArtist(artist.id, data)
+            router.push(`/dashboard/artists/${artist.id}`)
+            router.refresh()
         } catch (error) {
             console.error('Failed to update artist', error)
         } finally {

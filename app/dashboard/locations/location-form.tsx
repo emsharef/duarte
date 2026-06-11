@@ -50,10 +50,11 @@ export function LocationForm({ location }: LocationFormProps) {
         try {
             if (location) {
                 await updateLocation(location.id, data)
+                router.push(`/dashboard/locations/${location.id}`)
             } else {
-                await createLocation(data)
+                const newLocation = await createLocation(data)
+                router.push(`/dashboard/locations/${newLocation.id}`)
             }
-            router.push('/dashboard/locations')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

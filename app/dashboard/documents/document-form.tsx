@@ -45,6 +45,7 @@ export function DocumentForm({ document }: DocumentFormProps) {
                     document_date: formData.get('document_date') as string || undefined,
                 }
                 await updateDocument(document.id, data)
+                router.push(`/dashboard/documents/${document.id}`)
             } else {
                 // Upload new document
                 if (!selectedFile) {
@@ -53,9 +54,9 @@ export function DocumentForm({ document }: DocumentFormProps) {
                     return
                 }
                 formData.set('file', selectedFile)
-                await uploadDocument(formData)
+                const newDocument = await uploadDocument(formData)
+                router.push(`/dashboard/documents/${newDocument.id}`)
             }
-            router.push('/dashboard/documents')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

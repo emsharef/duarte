@@ -111,6 +111,38 @@ export async function getLoan(id: string) {
     return data
 }
 
+export async function getLoanWithRelations(id: string) {
+    const { supabase } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('loans')
+        .select(`
+            *,
+            borrower:contacts!borrower_contact_id(id, display_name, company_name),
+            lender:contacts!lender_contact_id(id, display_name, company_name),
+            insurance_policy:insurance_policies!insurance_policy_id(id, policy_subject, policy_number)
+        `)
+        .eq('id', id)
+        .single()
+    return data
+}
+
+export async function getLoanObjects(loanId: string) {
+    const { supabase } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('object_loans')
+        .select(`
+            loan_value,
+            object:objects(
+                id,
+                title,
+                inventory_number,
+                artist:artists(first_name, last_name)
+            )
+        `)
+        .eq('loan_id', loanId)
+    return data || []
+}
+
 export async function createLoan(data: Partial<Loan>) {
     const ctx = await getWorkspaceContext()
     requireEdit(ctx)

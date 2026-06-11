@@ -89,6 +89,38 @@ export async function getLocation(id: string) {
     return data
 }
 
+export async function getLocationWithParent(id: string) {
+    const { supabase } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('locations')
+        .select('*, parent:locations!parent_id(id, name)')
+        .eq('id', id)
+        .single()
+    return data
+}
+
+export async function getLocationChildren(id: string) {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('locations')
+        .select('id, name, type')
+        .eq('workspace_id', workspaceId)
+        .eq('parent_id', id)
+        .order('name', { ascending: true })
+    return data || []
+}
+
+export async function getLocationObjects(id: string) {
+    const { supabase, workspaceId } = await getWorkspaceContext()
+    const { data } = await supabase
+        .from('objects')
+        .select('id, title, inventory_number, status, artist:artists(first_name, last_name)')
+        .eq('workspace_id', workspaceId)
+        .eq('location_id', id)
+        .order('title', { ascending: true })
+    return data || []
+}
+
 export async function createLocation(data: Partial<Location>) {
     const ctx = await getWorkspaceContext()
     requireEdit(ctx)
