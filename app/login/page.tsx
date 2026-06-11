@@ -12,7 +12,7 @@ export default async function LoginPage({
         <div className="flex min-h-screen w-full items-center justify-center bg-background px-6">
             <form className="flex w-full max-w-sm flex-col gap-5 border-y border-border py-10">
                 <div className="mb-2 text-center">
-                    <h1 className="font-serif text-3xl font-semibold tracking-tight">DūArte</h1>
+                    <h1 className="font-serif text-3xl font-semibold">DūArte</h1>
                     <p className="mt-1 text-sm text-muted-foreground">Collection management</p>
                 </div>
                 {next ? <input type="hidden" name="next" value={next} /> : null}
