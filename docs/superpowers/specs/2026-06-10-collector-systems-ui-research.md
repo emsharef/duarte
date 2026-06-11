@@ -34,6 +34,23 @@ Single tab row: Objects, Artists, Locations, Collections, Contacts, Exhibitions,
 - **Trends**: left tree = metric (Object Count, Acquisition Total, Current Value, Current Insured Value) × dimension (Acquisition Year, Artist, Collection, Location, Medium, Object Type); renders bar chart + data table. Clean blueprint for duarte's Phase 3 dashboard.
 - **Calendar**: aggregated feed of dated records with per-module color-coded checkboxes (Acquisitions, Consignments, Exhibitions, Insurance Policies, Loans, Sales, Shipments, Valuations); Year/Month/Day/Week/Agenda views. Confirms duarte's "system events are queries, not rows" design.
 
+## Add Object form (full field inventory)
+
+Captured by opening the create form (cancelled without saving). Single long page, label-left layout, Save/Cancel at bottom. Fields in order:
+
+**Identity & status:** Inventory Number; Object Status (dropdown, default Current); Object Type (dropdown); Credit Line; Location Status (dropdown); Permanent Location (picker with Select / Clear / **Set To Current Location**); Location (picker with Select / Clear / **Set To Permanent Location**); Inventory Date (date+time); Inventory Contact (dropdown); Inventory Memo (rich text).
+
+**Cataloguing:** Maker; Title; Alternate Title; Object Date (free text, not just year); Medium; Form; Subject; Category/Style; Country of Origin; Edition; Suite/Portfolio; Catalog Raisonné; RFID Tag Number; **Term (Getty AAT)** — live "Search Getty Database" autocomplete; Previous ID; Purchase Price; Source File.
+
+**Rich-text blocks** (every one a full WYSIWYG editor, some with helper tooltips): Description, Signatures, Inscriptions, Labels, Provenance, Reference Notes, Research Notes, Staff Notes.
+
+Notes for duarte:
+- The two-location cross-fill buttons (Set To Current/Permanent) are a small, high-value UX detail — adopt.
+- Several fields duarte lacks and should consider in Phase 2: Credit Line, Alternate Title, Country of Origin, Suite/Portfolio, Catalogue Raisonné reference, Previous ID. (Form/Subject/Category-Style overlap with our categories+tags direction; RFID and Getty AAT are deferrable.)
+- Their Object Date is free text (handles "ca. 1962") — duarte's `year_created` integer is lossy; consider adding a `date_text` display field like our provenance design.
+- Distinct note fields per audience (Reference/Research/Staff) rather than one notes blob.
+- duarte deliberately won't use rich-text editors for every field — plain textareas + markdown is a better fit.
+
 ## Priority takeaways for Phase 2
 
 1. Object detail = header summary card + counted tab strip; record prev/next paging.
