@@ -133,37 +133,25 @@ export function ObjectHeader({ object, activity, canEdit }: ObjectHeaderProps) {
                         </HeaderField>
                     </div>
 
-                    {/* Caption block — quiet inset */}
-                    <div className="flex flex-col items-start gap-3 border-l-2 border-primary/30 py-1 pl-4 sm:flex-row sm:justify-between sm:gap-4">
-                        <div className="text-sm leading-relaxed text-foreground/85">
-                            {artist && <p>{artist}</p>}
-                            <p>
-                                <span className="italic">{object.title}</span>
-                                {(object.date_text || object.year_created) && `, ${object.date_text || object.year_created}`}
+                    {/* Audit line + compact caption copy */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        {(createdEntry || lastEntry) && (
+                            <p className="text-xs text-muted-foreground">
+                                {createdEntry && `Created ${formatDate(createdEntry.created_at)}`}
+                                {createdEntry && lastEntry && lastEntry.id !== createdEntry.id && ' · '}
+                                {lastEntry && lastEntry.id !== (createdEntry?.id ?? '') &&
+                                    `Last modified ${formatDate(lastEntry.created_at)}${lastEntry.user_email ? ` by ${lastEntry.user_email}` : ''}`}
                             </p>
-                            {object.medium && <p>{object.medium}</p>}
-                            {(() => {
-                                const dim = (object.object_dimensions || []).find((d) => d.height != null || d.width != null || d.depth != null)
-                                const text = dim ? dimensionText(dim, { bothUnits: true }) : null
-                                return text ? <p>{text}</p> : null
-                            })()}
-                            {object.inventory_number && <p>Inventory #: {object.inventory_number}</p>}
-                        </div>
-                        <Button variant="outline" size="sm" onClick={copyCaption} className="shrink-0">
-                            {copied ? <Check className="h-3.5 w-3.5 mr-1.5" /> : <Copy className="h-3.5 w-3.5 mr-1.5" />}
-                            {copied ? 'Copied' : 'Copy Caption'}
-                        </Button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={copyCaption}
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {copied ? 'Copied' : 'Copy caption'}
+                        </button>
                     </div>
-
-                    {/* Audit line */}
-                    {(createdEntry || lastEntry) && (
-                        <p className="text-xs text-muted-foreground">
-                            {createdEntry && `Created ${formatDate(createdEntry.created_at)}`}
-                            {createdEntry && lastEntry && lastEntry.id !== createdEntry.id && ' · '}
-                            {lastEntry && lastEntry.id !== (createdEntry?.id ?? '') &&
-                                `Last modified ${formatDate(lastEntry.created_at)}${lastEntry.user_email ? ` by ${lastEntry.user_email}` : ''}`}
-                        </p>
-                    )}
                 </div>
             </div>
         </div>
