@@ -9,7 +9,7 @@ export function Wordmark({ className }: { className?: string }) {
                 D
                 <span className="relative">
                     u
-                    <span className="absolute left-1/2 top-[0.12em] h-[0.055em] w-[0.46em] -translate-x-1/2 rounded-full bg-current" />
+                    <span className="absolute left-1/2 top-[0.39em] h-[0.06em] w-[0.28em] -translate-x-1/2 rounded-full bg-current" />
                 </span>
                 Arte
             </span>
