@@ -20,6 +20,7 @@ import {
 import { logout } from '@/app/login/actions'
 import { cn } from '@/lib/utils'
 import { WorkspaceSwitcher } from '@/components/workspace-switcher'
+import { Wordmark } from '@/components/wordmark'
 
 type Membership = { workspace_id: string; role: string; name: string }
 
@@ -53,9 +54,7 @@ export function Sidebar({
     return (
         <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
             <div className="flex h-16 items-center px-6">
-                <span className="font-serif text-xl font-semibold text-white">
-                    DūArte
-                </span>
+                <Wordmark className="text-xl text-white" />
             </div>
 
             <div className="border-b border-sidebar-border px-3 pb-3">

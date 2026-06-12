@@ -1,3 +1,4 @@
+import { Wordmark } from '@/components/wordmark'
 import { login, loginWithGoogle } from './actions'
 
 const inputClass = 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
@@ -12,7 +13,7 @@ export default async function LoginPage({
         <div className="flex min-h-screen w-full items-center justify-center bg-background px-6">
             <form className="flex w-full max-w-sm flex-col gap-5 border-y border-border py-10">
                 <div className="mb-2 text-center">
-                    <h1 className="font-serif text-3xl font-semibold">DūArte</h1>
+                    <h1 className="text-3xl"><Wordmark className="text-3xl" /></h1>
                     <p className="mt-1 text-sm text-muted-foreground">Collection management</p>
                 </div>
                 {next ? <input type="hidden" name="next" value={next} /> : null}

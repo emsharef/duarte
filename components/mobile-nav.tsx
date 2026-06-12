@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Sidebar } from '@/components/sidebar'
+import { Wordmark } from '@/components/wordmark'
 
 type Membership = { workspace_id: string; role: string; name: string }
 
@@ -43,9 +44,7 @@ export function MobileNav({
                     />
                 </SheetContent>
             </Sheet>
-            <span className="font-serif text-lg font-semibold text-white">
-                DūArte
-            </span>
+            <Wordmark className="text-lg text-white" />
         </header>
     )
 }

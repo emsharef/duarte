@@ -4,18 +4,18 @@ import "./globals.css";
 
 const archivo = Archivo({
   variable: "--font-archivo",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
