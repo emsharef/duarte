@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import { Check, Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ObjectWithRelations, updateObjectFields } from '@/app/dashboard/objects/actions'
 import { InlineField, InlineFieldOption } from './inline-field'
 
@@ -18,7 +21,14 @@ type InfoTabProps = {
     canEdit: boolean
 }
 
+function hasValue(field: FieldDef, value: unknown): boolean {
+    if (value == null || value === '') return false
+    if (field.type === 'boolean') return value === true
+    return true
+}
+
 export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
+    const [editing, setEditing] = useState(false)
     const categoryOptions: InlineFieldOption[] = categories.map((c) => ({ value: c.id, label: c.name }))
 
     const groups: Array<{ title: string; fields: FieldDef[] }> = [
@@ -79,12 +89,45 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
 
     const customFields = Object.entries(object.custom_fields ?? {})
 
+    // View mode shows only populated fields (and drops empty sections);
+    // edit mode reveals everything.
+    const visibleGroups = groups
+        .map((group) => ({
+            ...group,
+            fields: editing
+                ? group.fields
+                : group.fields.filter((f) => hasValue(f, object[f.key])),
+        }))
+        .filter((group) => group.fields.length > 0)
+
+    const nothingPopulated = !editing && visibleGroups.length === 0
+
     return (
         <div className="space-y-10">
             {canEdit && (
-                <p className="-mt-4 text-xs text-muted-foreground/70">Click any field to edit.</p>
+                <div className="-mt-2 flex items-center justify-between gap-4">
+                    <p className="text-xs text-muted-foreground/70">
+                        {editing ? 'Click any field to edit. Empty fields are shown.' : ' '}
+                    </p>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 shrink-0"
+                        onClick={() => setEditing((v) => !v)}
+                    >
+                        {editing ? <Check className="mr-1.5 h-3.5 w-3.5" /> : <Pencil className="mr-1.5 h-3.5 w-3.5" />}
+                        {editing ? 'Done' : 'Edit fields'}
+                    </Button>
+                </div>
             )}
-            {groups.map((group) => (
+
+            {nothingPopulated && (
+                <p className="border-y border-dashed py-10 text-center text-[13px] text-muted-foreground">
+                    No catalogue details yet.{canEdit ? ' Use “Edit fields” to add them.' : ''}
+                </p>
+            )}
+
+            {visibleGroups.map((group) => (
                 <section key={group.title}>
                     <h3 className="mb-4 border-b pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{group.title}</h3>
                     <div className={group.title === 'Texts'
@@ -97,7 +140,7 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
                                 value={object[field.key] as string | number | boolean | null | undefined}
                                 type={field.type}
                                 options={field.options}
-                                canEdit={canEdit}
+                                canEdit={canEdit && editing}
                                 onSave={(value) =>
                                     updateObjectFields(object.id, { [field.key]: parseValue(field, value) })}
                             />
@@ -106,9 +149,9 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
                 </section>
             ))}
 
-            <section>
-                <h3 className="mb-4 border-b pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Custom fields</h3>
-                {customFields.length > 0 ? (
+            {customFields.length > 0 && (
+                <section>
+                    <h3 className="mb-4 border-b pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Custom fields</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
                         {customFields.map(([key, value]) => (
                             <div key={key}>
@@ -117,10 +160,8 @@ export function InfoTab({ object, categories, canEdit }: InfoTabProps) {
                             </div>
                         ))}
                     </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground">No custom fields.</p>
-                )}
-            </section>
+                </section>
+            )}
         </div>
     )
 }
