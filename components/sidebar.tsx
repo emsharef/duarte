@@ -7,7 +7,6 @@ import {
     Users,
     MapPin,
     Settings,
-    PlusCircle,
     Contact,
     ShoppingCart,
     Shield,
@@ -63,17 +62,6 @@ export function Sidebar({
                     activeWorkspaceId={activeWorkspaceId}
                     onNavigate={onNavigate}
                 />
-            </div>
-
-            <div className="px-3 pt-4 pb-2">
-                <Link
-                    href="/dashboard/objects/new"
-                    onClick={onNavigate}
-                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
-                >
-                    <PlusCircle className="h-4 w-4" />
-                    Add Object
-                </Link>
             </div>
 
             <nav className="flex-1 space-y-px overflow-y-auto px-3 py-2">

@@ -1,3 +1,5 @@
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { r2 } from '@/lib/r2'
@@ -169,7 +171,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     return (
         <SelectionProvider scope="objects">
             <div>
-                <div className="mb-6 border-b pb-4">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b pb-4">
                     <div className="flex items-baseline gap-3">
                         <h1 className="font-serif text-3xl font-medium tracking-tight">
                             Inventory
@@ -178,6 +180,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                             {rows.length} object{rows.length === 1 ? '' : 's'} in view
                         </p>
                     </div>
+                    <Link
+                        href="/dashboard/objects/new"
+                        className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Object
+                    </Link>
                 </div>
                 <InventoryView
                     rows={rows}
