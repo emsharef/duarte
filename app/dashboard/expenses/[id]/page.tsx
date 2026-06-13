@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getExpense, deleteExpense } from '@/app/actions/expenses'
 import { getDocumentsForEntity } from '@/app/actions/documents'
+import { getWorkspaceContext } from '@/lib/workspace'
 import {
     RecordToolbar, RecordField, RecordSection, RecordEmpty,
     formatRecordDate, formatRecordCurrency,
 } from '@/components/record-view'
+import { LinkedDocumentsSection } from '@/components/record-view-linked-documents'
 import { DeleteRecordButton } from '@/components/delete-record-button'
-import { FileText } from 'lucide-react'
 
 export default async function ExpensePage({
     params,
@@ -21,7 +22,11 @@ export default async function ExpensePage({
         notFound()
     }
 
-    const documents = await getDocumentsForEntity('expense', id)
+    const [{ role }, documents] = await Promise.all([
+        getWorkspaceContext(),
+        getDocumentsForEntity('expense', id),
+    ])
+    const canEdit = role !== 'viewer'
 
     const vendor = expense.vendor_contact as { id?: string; display_name?: string } | null
     const object = expense.object as { id?: string; title?: string; inventory_number?: string | null } | null
@@ -107,27 +112,12 @@ export default async function ExpensePage({
                 )}
             </RecordSection>
 
-            <RecordSection title="Documents" count={documents.length}>
-                {documents.length === 0 ? (
-                    <RecordEmpty text="No documents linked to this expense." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {documents.map((doc) => (
-                            <li key={doc.id} className="flex items-center justify-between gap-4 py-3">
-                                <div className="flex min-w-0 items-center gap-2">
-                                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                    <Link href={`/dashboard/documents/${doc.id}`} className="truncate text-sm font-medium hover:underline">
-                                        {doc.document_name}
-                                    </Link>
-                                </div>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                    {[doc.document_type, formatRecordDate(doc.document_date)].filter(Boolean).join(' · ')}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedDocumentsSection
+                items={documents}
+                entityType="expense"
+                entityId={id}
+                canEdit={canEdit}
+            />
         </div>
     )
 }

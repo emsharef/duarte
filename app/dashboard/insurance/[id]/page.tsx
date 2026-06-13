@@ -1,13 +1,27 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getInsurancePolicy, getPolicyObjects, deleteInsurancePolicy } from '@/app/actions/insurance'
-import { getDocumentsForEntity } from '@/app/actions/documents'
 import {
-    RecordToolbar, RecordField, RecordSection, RecordEmpty,
+    getInsurancePolicy, getPolicyObjects, deleteInsurancePolicy,
+    linkObjectToPolicy, unlinkObjectFromPolicy,
+} from '@/app/actions/insurance'
+import { getDocumentsForEntity } from '@/app/actions/documents'
+import { getObjectsForSelection } from '@/app/dashboard/objects/actions'
+import { getWorkspaceContext } from '@/lib/workspace'
+import {
+    RecordToolbar, RecordField,
     formatRecordDate, formatRecordCurrency,
 } from '@/components/record-view'
+import { LinkedObjectsSection } from '@/components/record-view-linked-objects'
+import { LinkedDocumentsSection } from '@/components/record-view-linked-documents'
 import { DeleteRecordButton } from '@/components/delete-record-button'
-import { FileText } from 'lucide-react'
+
+type LinkedObjectRow = {
+    insured_value?: number | null
+    object: {
+        id: string; title: string; inventory_number?: string | null
+        artist?: { first_name?: string | null; last_name?: string | null } | null
+    } | null
+}
 
 export default async function InsurancePolicyPage({
     params,
@@ -21,13 +35,40 @@ export default async function InsurancePolicyPage({
         notFound()
     }
 
-    const [objects, documents] = await Promise.all([
-        getPolicyObjects(id),
+    const [{ role }, objects, documents] = await Promise.all([
+        getWorkspaceContext(),
+        getPolicyObjects(id) as Promise<LinkedObjectRow[]>,
         getDocumentsForEntity('insurance', id),
     ])
+    const canEdit = role !== 'viewer'
 
     const insurer = policy.insurer_contact as { id?: string; display_name?: string } | null
     const currency = policy.currency || 'USD'
+
+    const linkedObjects = objects
+        .filter((item) => item.object)
+        .map((item) => {
+            const obj = item.object!
+            return {
+                id: obj.id,
+                title: obj.title,
+                inventory_number: obj.inventory_number,
+                artist_name: obj.artist
+                    ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
+                    : null,
+                value: item.insured_value,
+            }
+        })
+
+    async function linkObject(objectId: string, value: number | null) {
+        'use server'
+        await linkObjectToPolicy(objectId, id, value ?? undefined)
+    }
+
+    async function unlinkObject(objectId: string) {
+        'use server'
+        await unlinkObjectFromPolicy(objectId, id)
+    }
 
     return (
         <div className="space-y-8">
@@ -87,61 +128,24 @@ export default async function InsurancePolicyPage({
                 )}
             </div>
 
-            <RecordSection title="Objects covered" count={objects.length}>
-                {objects.length === 0 ? (
-                    <RecordEmpty text="No objects linked to this policy." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {objects.map((item, idx) => {
-                            const obj = item.object as unknown as {
-                                id: string; title: string; inventory_number?: string | null
-                                artist?: { first_name?: string | null; last_name?: string | null } | null
-                            } | null
-                            if (!obj) return null
-                            const artist = obj.artist
-                                ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
-                                : ''
-                            return (
-                                <li key={obj.id || idx} className="flex items-center justify-between gap-4 py-3">
-                                    <div className="min-w-0">
-                                        <Link href={`/dashboard/objects/${obj.id}`} className="text-sm font-medium hover:underline">
-                                            {obj.title}
-                                        </Link>
-                                        <p className="text-xs text-muted-foreground">
-                                            {[artist, obj.inventory_number].filter(Boolean).join(' · ')}
-                                        </p>
-                                    </div>
-                                    <span className="shrink-0 text-sm tabular-nums">
-                                        {formatRecordCurrency(item.insured_value, currency) || '—'}
-                                    </span>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedObjectsSection
+                title="Objects covered"
+                items={linkedObjects}
+                currency={currency}
+                valueLabel="Insured value"
+                emptyText="No objects linked to this policy."
+                canEdit={canEdit}
+                loadOptions={getObjectsForSelection}
+                onLink={linkObject}
+                onUnlink={unlinkObject}
+            />
 
-            <RecordSection title="Documents" count={documents.length}>
-                {documents.length === 0 ? (
-                    <RecordEmpty text="No documents linked to this policy." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {documents.map((doc) => (
-                            <li key={doc.id} className="flex items-center justify-between gap-4 py-3">
-                                <div className="flex min-w-0 items-center gap-2">
-                                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                    <Link href={`/dashboard/documents/${doc.id}`} className="truncate text-sm font-medium hover:underline">
-                                        {doc.document_name}
-                                    </Link>
-                                </div>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                    {[doc.document_type, formatRecordDate(doc.document_date)].filter(Boolean).join(' · ')}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedDocumentsSection
+                items={documents}
+                entityType="insurance"
+                entityId={id}
+                canEdit={canEdit}
+            />
         </div>
     )
 }

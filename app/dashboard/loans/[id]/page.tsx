@@ -3,11 +3,24 @@ import { notFound } from 'next/navigation'
 import { getLoanWithRelations, getLoanObjects, deleteLoan } from '@/app/actions/loans'
 import { getDocumentsForEntity } from '@/app/actions/documents'
 import {
-    RecordToolbar, RecordField, RecordSection, RecordEmpty,
+    getObjectsForSelection, linkObjectToLoan, unlinkObjectFromLoan,
+} from '@/app/dashboard/objects/actions'
+import { getWorkspaceContext } from '@/lib/workspace'
+import {
+    RecordToolbar, RecordField,
     formatRecordDate, formatRecordCurrency,
 } from '@/components/record-view'
+import { LinkedObjectsSection } from '@/components/record-view-linked-objects'
+import { LinkedDocumentsSection } from '@/components/record-view-linked-documents'
 import { DeleteRecordButton } from '@/components/delete-record-button'
-import { FileText } from 'lucide-react'
+
+type LinkedObjectRow = {
+    loan_value?: number | null
+    object: {
+        id: string; title: string; inventory_number?: string | null
+        artist?: { first_name?: string | null; last_name?: string | null } | null
+    } | null
+}
 
 export default async function LoanPage({
     params,
@@ -21,10 +34,38 @@ export default async function LoanPage({
         notFound()
     }
 
-    const [objects, documents] = await Promise.all([
-        getLoanObjects(id),
+    const [{ role }, objects, documents] = await Promise.all([
+        getWorkspaceContext(),
+        getLoanObjects(id) as Promise<LinkedObjectRow[]>,
         getDocumentsForEntity('loan', id),
     ])
+    const canEdit = role !== 'viewer'
+    const currency = loan.currency || 'USD'
+
+    const linkedObjects = objects
+        .filter((item) => item.object)
+        .map((item) => {
+            const obj = item.object!
+            return {
+                id: obj.id,
+                title: obj.title,
+                inventory_number: obj.inventory_number,
+                artist_name: obj.artist
+                    ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
+                    : null,
+                value: item.loan_value,
+            }
+        })
+
+    async function linkObject(objectId: string, value: number | null) {
+        'use server'
+        await linkObjectToLoan(objectId, id, value ?? undefined)
+    }
+
+    async function unlinkObject(objectId: string) {
+        'use server'
+        await unlinkObjectFromLoan(objectId, id)
+    }
 
     const counterpartyLabel = loan.direction === 'out' ? 'Borrower' : 'Lender'
     const counterparty = loan.direction === 'out' ? loan.borrower : loan.lender
@@ -85,61 +126,24 @@ export default async function LoanPage({
                 )}
             </div>
 
-            <RecordSection title="Objects on loan" count={objects.length}>
-                {objects.length === 0 ? (
-                    <RecordEmpty text="No objects linked to this loan." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {objects.map((item) => {
-                            const obj = item.object as unknown as {
-                                id: string; title: string; inventory_number?: string | null
-                                artist?: { first_name?: string | null; last_name?: string | null } | null
-                            } | null
-                            if (!obj) return null
-                            const artist = obj.artist
-                                ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
-                                : ''
-                            return (
-                                <li key={obj.id} className="flex items-center justify-between gap-4 py-3">
-                                    <div className="min-w-0">
-                                        <Link href={`/dashboard/objects/${obj.id}`} className="text-sm font-medium hover:underline">
-                                            {obj.title}
-                                        </Link>
-                                        <p className="text-xs text-muted-foreground">
-                                            {[artist, obj.inventory_number].filter(Boolean).join(' · ')}
-                                        </p>
-                                    </div>
-                                    <span className="shrink-0 text-sm tabular-nums">
-                                        {formatRecordCurrency(item.loan_value, loan.currency || 'USD') || '—'}
-                                    </span>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedObjectsSection
+                title="Objects on loan"
+                items={linkedObjects}
+                currency={currency}
+                valueLabel="Loan value"
+                emptyText="No objects linked to this loan."
+                canEdit={canEdit}
+                loadOptions={getObjectsForSelection}
+                onLink={linkObject}
+                onUnlink={unlinkObject}
+            />
 
-            <RecordSection title="Documents" count={documents.length}>
-                {documents.length === 0 ? (
-                    <RecordEmpty text="No documents linked to this loan." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {documents.map((doc) => (
-                            <li key={doc.id} className="flex items-center justify-between gap-4 py-3">
-                                <div className="flex min-w-0 items-center gap-2">
-                                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                    <Link href={`/dashboard/documents/${doc.id}`} className="truncate text-sm font-medium hover:underline">
-                                        {doc.document_name}
-                                    </Link>
-                                </div>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                    {[doc.document_type, formatRecordDate(doc.document_date)].filter(Boolean).join(' · ')}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedDocumentsSection
+                items={documents}
+                entityType="loan"
+                entityId={id}
+                canEdit={canEdit}
+            />
         </div>
     )
 }

@@ -49,20 +49,25 @@ export function RecordField({ label, children }: { label: string; children?: Rea
 export function RecordSection({
     title,
     count,
+    action,
     children,
 }: {
     title: string
     count?: number
+    action?: React.ReactNode
     children: React.ReactNode
 }) {
     return (
         <section className="space-y-3">
-            <h2 className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                {title}
-                {typeof count === 'number' && (
-                    <span className="ml-1.5 text-muted-foreground/60">{count}</span>
-                )}
-            </h2>
+            <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                    {title}
+                    {typeof count === 'number' && (
+                        <span className="ml-1.5 text-muted-foreground/60">{count}</span>
+                    )}
+                </h2>
+                {action}
+            </div>
             {children}
         </section>
     )

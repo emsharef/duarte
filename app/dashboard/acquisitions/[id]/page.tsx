@@ -1,16 +1,36 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAcquisition, getAcquisitionObjects, deleteAcquisition } from '@/app/actions/acquisitions'
-import { getDocumentsForEntity } from '@/app/actions/documents'
 import {
-    RecordToolbar, RecordField, RecordSection, RecordEmpty,
+    getAcquisition, getAcquisitionObjects, deleteAcquisition,
+    linkObjectToAcquisition, unlinkObjectFromAcquisition,
+} from '@/app/actions/acquisitions'
+import { getDocumentsForEntity } from '@/app/actions/documents'
+import { getObjectsForSelection } from '@/app/dashboard/objects/actions'
+import { getWorkspaceContext } from '@/lib/workspace'
+import {
+    RecordToolbar, RecordField,
     formatRecordDate, formatRecordCurrency,
 } from '@/components/record-view'
+import { LinkedObjectsSection } from '@/components/record-view-linked-objects'
+import { LinkedDocumentsSection } from '@/components/record-view-linked-documents'
 import { DeleteRecordButton } from '@/components/delete-record-button'
-import { FileText } from 'lucide-react'
+
+type LinkedObjectRow = {
+    object_price?: number | string | null
+    object: {
+        id: string; title: string; inventory_number?: string | null
+        artist?: { first_name?: string | null; last_name?: string | null } | null
+    } | null
+}
 
 type Props = {
     params: Promise<{ id: string }>
+}
+
+const toNumber = (val: unknown): number | null => {
+    if (val === null || val === undefined) return null
+    const num = typeof val === 'string' ? parseFloat(val) : (val as number)
+    return isNaN(num) ? null : num
 }
 
 export default async function AcquisitionPage({ params }: Props) {
@@ -21,15 +41,37 @@ export default async function AcquisitionPage({ params }: Props) {
         notFound()
     }
 
-    const [objects, documents] = await Promise.all([
-        getAcquisitionObjects(id),
+    const [{ role }, objects, documents] = await Promise.all([
+        getWorkspaceContext(),
+        getAcquisitionObjects(id) as Promise<LinkedObjectRow[]>,
         getDocumentsForEntity('acquisition', id),
     ])
+    const canEdit = role !== 'viewer'
+    const currency = acquisition.currency || 'USD'
 
-    const toNumber = (val: unknown): number | null => {
-        if (val === null || val === undefined) return null
-        const num = typeof val === 'string' ? parseFloat(val) : (val as number)
-        return isNaN(num) ? null : num
+    const linkedObjects = objects
+        .filter((item) => item.object)
+        .map((item) => {
+            const obj = item.object!
+            return {
+                id: obj.id,
+                title: obj.title,
+                inventory_number: obj.inventory_number,
+                artist_name: obj.artist
+                    ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
+                    : null,
+                value: toNumber(item.object_price),
+            }
+        })
+
+    async function linkObject(objectId: string, value: number | null) {
+        'use server'
+        await linkObjectToAcquisition(objectId, id, value ?? undefined)
+    }
+
+    async function unlinkObject(objectId: string) {
+        'use server'
+        await unlinkObjectFromAcquisition(objectId, id)
     }
 
     return (
@@ -82,62 +124,24 @@ export default async function AcquisitionPage({ params }: Props) {
                 )}
             </div>
 
-            <RecordSection title="Objects" count={objects.length}>
-                {objects.length === 0 ? (
-                    <RecordEmpty text="No objects linked to this acquisition." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {objects.map((item) => {
-                            const obj = item.object as unknown as {
-                                id: string; title: string; inventory_number?: string | null
-                                artist?: { first_name?: string | null; last_name?: string | null } | null
-                            } | null
-                            if (!obj) return null
-                            const artist = obj.artist
-                                ? `${obj.artist.first_name || ''} ${obj.artist.last_name || ''}`.trim()
-                                : ''
-                            const price = toNumber(item.object_price)
-                            return (
-                                <li key={obj.id} className="flex items-center justify-between gap-4 py-3">
-                                    <div className="min-w-0">
-                                        <Link href={`/dashboard/objects/${obj.id}`} className="text-sm font-medium hover:underline">
-                                            {obj.title}
-                                        </Link>
-                                        <p className="text-xs text-muted-foreground">
-                                            {[artist, obj.inventory_number].filter(Boolean).join(' · ')}
-                                        </p>
-                                    </div>
-                                    <span className="shrink-0 text-sm tabular-nums">
-                                        {formatRecordCurrency(price, acquisition.currency || 'USD') || '—'}
-                                    </span>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedObjectsSection
+                title="Objects"
+                items={linkedObjects}
+                currency={currency}
+                valueLabel="Price"
+                emptyText="No objects linked to this acquisition."
+                canEdit={canEdit}
+                loadOptions={getObjectsForSelection}
+                onLink={linkObject}
+                onUnlink={unlinkObject}
+            />
 
-            <RecordSection title="Documents" count={documents.length}>
-                {documents.length === 0 ? (
-                    <RecordEmpty text="No documents linked to this acquisition." />
-                ) : (
-                    <ul className="border-y divide-y">
-                        {documents.map((doc) => (
-                            <li key={doc.id} className="flex items-center justify-between gap-4 py-3">
-                                <div className="flex min-w-0 items-center gap-2">
-                                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                    <Link href={`/dashboard/documents/${doc.id}`} className="truncate text-sm font-medium hover:underline">
-                                        {doc.document_name}
-                                    </Link>
-                                </div>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                    {[doc.document_type, formatRecordDate(doc.document_date)].filter(Boolean).join(' · ')}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </RecordSection>
+            <LinkedDocumentsSection
+                items={documents}
+                entityType="acquisition"
+                entityId={id}
+                canEdit={canEdit}
+            />
         </div>
     )
 }
