@@ -19,6 +19,7 @@ export type Acquisition = {
     total_cost?: number | null
     invoice_number?: string | null
     invoice_date?: string | null
+    paid_date?: string | null
     notes?: string | null
     created_at?: string
     updated_at?: string

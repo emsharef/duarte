@@ -100,6 +100,7 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
             total_cost: grandTotal || undefined,
             invoice_number: formData.get('invoice_number') as string || undefined,
             invoice_date: formData.get('invoice_date') as string || undefined,
+            paid_date: formData.get('paid_date') as string || undefined,
             notes: formData.get('notes') as string || undefined,
         }
 
@@ -279,6 +280,16 @@ export function AcquisitionForm({ acquisition, initialObjects = [] }: Acquisitio
                         name="invoice_date"
                         type="date"
                         defaultValue={acquisition?.invoice_date || ''}
+                    />
+                </div>
+
+                <div>
+                    <Label htmlFor="paid_date">Paid Date</Label>
+                    <Input
+                        id="paid_date"
+                        name="paid_date"
+                        type="date"
+                        defaultValue={acquisition?.paid_date || ''}
                     />
                 </div>
 

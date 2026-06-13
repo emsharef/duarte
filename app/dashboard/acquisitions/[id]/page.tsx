@@ -73,6 +73,7 @@ export default async function AcquisitionPage({ params }: Props) {
                     <RecordField label="Currency">{acquisition.currency}</RecordField>
                     <RecordField label="Invoice #">{acquisition.invoice_number}</RecordField>
                     <RecordField label="Invoice date">{formatRecordDate(acquisition.invoice_date)}</RecordField>
+                    <RecordField label="Paid date">{formatRecordDate(acquisition.paid_date)}</RecordField>
                 </div>
                 {acquisition.notes && (
                     <p className="border-l-2 border-primary/30 pl-4 text-sm leading-relaxed text-foreground/85">

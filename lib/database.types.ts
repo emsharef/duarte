@@ -30,6 +30,7 @@ export type Database = {
           exchange_rate: number | null
           id: string
           invoice_date: string | null
+          paid_date: string | null
           invoice_number: string | null
           notes: string | null
           taxes: number | null
@@ -52,6 +53,7 @@ export type Database = {
           exchange_rate?: number | null
           id?: string
           invoice_date?: string | null
+          paid_date?: string | null
           invoice_number?: string | null
           notes?: string | null
           taxes?: number | null
@@ -74,6 +76,7 @@ export type Database = {
           exchange_rate?: number | null
           id?: string
           invoice_date?: string | null
+          paid_date?: string | null
           invoice_number?: string | null
           notes?: string | null
           taxes?: number | null
