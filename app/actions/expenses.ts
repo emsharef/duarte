@@ -15,8 +15,8 @@ export type Expense = {
     invoice_number?: string
     created_at?: string
     // Joined data
-    vendor_contact?: { display_name: string }
-    object?: { title: string; inventory_number?: string }
+    vendor_contact?: { id?: string; display_name: string }
+    object?: { id?: string; title: string; inventory_number?: string }
 }
 
 export async function getExpenses() {
@@ -53,12 +53,12 @@ export async function getExpense(id: string) {
         .from('expenses')
         .select(`
             *,
-            vendor_contact:contacts!vendor_contact_id(display_name),
-            object:objects!object_id(title, inventory_number)
+            vendor_contact:contacts!vendor_contact_id(id, display_name),
+            object:objects!object_id(id, title, inventory_number)
         `)
         .eq('id', id)
         .single()
-    return data
+    return data as Expense | null
 }
 
 export async function createExpense(data: Partial<Expense>) {

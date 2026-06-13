@@ -20,7 +20,7 @@ export type InsurancePolicy = {
     created_at?: string
     updated_at?: string
     // Joined data
-    insurer_contact?: { display_name: string }
+    insurer_contact?: { id?: string; display_name: string }
     object_count?: number
 }
 
@@ -76,11 +76,11 @@ export async function getInsurancePolicy(id: string) {
         .from('insurance_policies')
         .select(`
             *,
-            insurer_contact:contacts!insurer_contact_id(display_name)
+            insurer_contact:contacts!insurer_contact_id(id, display_name)
         `)
         .eq('id', id)
         .single()
-    return data
+    return data as InsurancePolicy | null
 }
 
 export async function getPolicyObjects(policyId: string) {

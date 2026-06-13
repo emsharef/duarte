@@ -48,10 +48,11 @@ export function ExpenseForm({ expense, objectId }: ExpenseFormProps) {
         try {
             if (expense) {
                 await updateExpense(expense.id, data)
+                router.push(`/dashboard/expenses/${expense.id}`)
             } else {
                 await createExpense(data)
+                router.push('/dashboard/expenses')
             }
-            router.push('/dashboard/expenses')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

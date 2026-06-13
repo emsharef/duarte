@@ -17,7 +17,7 @@ export type Valuation = {
     created_at?: string
     updated_at?: string
     // Joined data
-    appraiser_contact?: { display_name: string }
+    appraiser_contact?: { id?: string; display_name: string }
     object_count?: number
 }
 
@@ -72,11 +72,11 @@ export async function getValuation(id: string) {
         .from('valuations')
         .select(`
             *,
-            appraiser_contact:contacts!appraiser_contact_id(display_name)
+            appraiser_contact:contacts!appraiser_contact_id(id, display_name)
         `)
         .eq('id', id)
         .single()
-    return data
+    return data as Valuation | null
 }
 
 export async function getValuationObjects(valuationId: string) {

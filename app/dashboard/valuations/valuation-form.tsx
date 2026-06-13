@@ -47,10 +47,11 @@ export function ValuationForm({ valuation }: ValuationFormProps) {
         try {
             if (valuation) {
                 await updateValuation(valuation.id, data)
+                router.push(`/dashboard/valuations/${valuation.id}`)
             } else {
                 await createValuation(data)
+                router.push('/dashboard/valuations')
             }
-            router.push('/dashboard/valuations')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')

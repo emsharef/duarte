@@ -52,10 +52,11 @@ export function InsuranceForm({ policy }: InsuranceFormProps) {
         try {
             if (policy) {
                 await updateInsurancePolicy(policy.id, data)
+                router.push(`/dashboard/insurance/${policy.id}`)
             } else {
                 await createInsurancePolicy(data)
+                router.push('/dashboard/insurance')
             }
-            router.push('/dashboard/insurance')
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')
